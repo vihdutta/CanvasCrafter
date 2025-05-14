@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Week Overview</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+        }
+        .grid-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-left: -15px;
+            margin-right: -15px;
+        }
+        .col-sm-12, .col-md-12, .col-lg-4, .col-lg-6, .col-md-7, .col-md-5, .col-xs-12 {
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
+            width: 100%; /* Default for smaller screens */
+        }
+
+        /* Basic responsive column sizing (simplified) */
+        @media (min-width: 992px) { /* Corresponds to 'lg' breakpoint */
+            .col-lg-4 {
+                width: 33.3333%;
+            }
+            .col-lg-6 {
+                width: 50%;
+            }
+        }
+        @media (min-width: 768px) { /* Corresponds to 'md' breakpoint */
+            .col-md-5 {
+                width: 41.6667%;
+            }
+            .col-md-6 {
+                 width: 50%;
+            }
+            .col-md-7 {
+                width: 58.3333%;
+            }
+        }
+        /* General styling */
+        .content-box {
+            padding: 10px;
+        }
+        .styleguide-section__grid-demo-element {
+            margin-bottom: 15px;
+        }
+        h2, h3 {
+            color: #000000;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div style="background-color: #d5e0ec; padding-left: 15px;">
+    <h2 style="text-align: center;"><span style="color: #000000;">Overview - Week {{ week_number }}</span></h2>
+</div>
+
+<section>
+    <div class="content-box">
+        <div class="grid-row">
+            <div class="col-sm-12 col-lg-6">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #fcf7d2;">
+                        <div style="background-color: #d5e0ec; padding-left: 15px;">
+                            <h3 style="text-align: center;"><img id="36156766" role="presentation" src="https://umich.instructure.com/courses/799907/files/41036074/preview" alt="Schedule Icon" width="47" height="32" data-api-endpoint="https://umich.instructure.com/api/v1/courses/799907/files/41036074" data-api-returntype="File" /><span style="color: #000000;"> Schedule Info</span></h3>
+                        </div>
+                        <p style="text-align: center;"><span style="color: #000000;">Last Week:</span> {{ last_week_text }}</p>
+                        <p style="text-align: center;"><span style="color: #000000;">Next Week: {{ next_week_text }}</span></p>
+                        <p style="text-align: center;">{{ full_course_schedule_text }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-lg-6">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #fcf7d2;">
+                        <div style="background-color: #d5e0ec; padding-left: 15px;">
+                            <h3 style="text-align: center;"><span style="color: #000000;"><img id="36156797" role="presentation" src="https://umich.instructure.com/courses/799907/files/41036064/preview" alt="Upcoming Work Icon" width="24" height="26" data-api-endpoint="https://umich.instructure.com/api/v1/courses/799907/files/41036064" data-api-returntype="File" /> UPCOMING WORK</span></h3>
+                        </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div style="background-color: #d5e0ec; padding-left: 15px;">
+    <h2 style="text-align: center;"><span style="color: #000000;">Module {{ module_number }} Learning Objectives: {{ module_number_learning_objectives }}</span></h2>
+</div>
+<div class="content-box">
+    <div class="grid-row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            </div>
+    </div>
+</div>
+
+<section>
+    <div style="background-color: #d5e0ec; padding-left: 15px;">
+        <h2 style="text-align: center;"><span style="color: #000000;">Week {{ week_number }} Activities</span></h2>
+    </div>
+    <div class="content-box">
+        <div class="grid-row">
+            <div class="col-sm-12 col-md-12 col-lg-4">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #c3ddd6; padding-left: 15px; padding-bottom: 15px;">
+                        <h2 style="text-align: center;"><span style="color: #000000;">Monday</span></h2>
+                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week_start|strftime('%Y-%m-%d') }}</span></h2>
+                    </div>
+                    <h3>Before Class</h3>
+                    <h4>Prework</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <h4 style="font-family: 'Lato Extended', Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;">N/A</h4>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-4">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #f6cac9; padding-left: 15px; padding-bottom: 15px;">
+                        <h2 style="text-align: center;"><span style="color: #000000;">Wednesday</span></h2>
+                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week_start|add_days(2)|strftime('%Y-%m-%d') }}</span></h2>
+                    </div>
+                    <h3>Before Class</h3>
+                    <h4>Prework</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <h4 style="font-family: 'Lato Extended', Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;">N/A</h4>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-4">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #d1c3d5; padding-left: 15px; padding-bottom: 15px;">
+                        <h2 style="text-align: center;"><span style="color: #000000;">Friday</span></h2>
+                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week_start|add_days(4)|strftime('%Y-%m-%d') }}</span></h2>
+                    </div>
+                    <h3>Before Class</h3>
+                    <h4>Prework</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <h4 style="font-family: 'Lato Extended', Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;">N/A</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <h2 style="text-align: center; background-color: #d5e0ec;"><span style="color: #000000;">Course Information</span></h2>
+    <div class="content-box">
+        <div class="grid-row">
+            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #000000; font-family: inherit; font-size: 1rem;">Lecture time and location:</span></div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #000000;">Monday, Wednesday, &amp; Friday 11:30 AM - 1:00 PM</span></div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #000000;">3460 Central Campus Classroom Building (CCCB)</span></div>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #2c333e; font-family: inherit; font-size: 1rem;">Full Schedule Calendar (PDF) / Canvas Modules</span></div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span class="textLayer--absolute" style="font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Course Syllabus (PDF)</span></div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #2c333e;"><span class="textLayer--absolute" style="font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Instructors and Office Hours</span></span></div>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
