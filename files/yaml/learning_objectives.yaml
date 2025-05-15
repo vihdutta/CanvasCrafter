@@ -1,100 +1,65 @@
 # learning objectives organized by each module
 
-modules:
-  - name: Module 1 - Particle Kinetics
-    learning_objectives:
-      - id: LO1
-        description: Understand the relationship between position, velocity, and acceleration
-      - id: LO2
-        description: Select appropriate coordinate systems and be able to apply them correctly (cartesian, polar/cylindrical, normal-tangential)
-      - id: LO3
-        description: Execute coordinate transformations
-      - id: LO4
-        description: Define kinematic variables using vector notation
-      - id: LO5
-        description: Solve systems of linear equations
-      - id: LO6
-        description: Analyze kinematic equations that require implementation of calculus
+1:
+  name: Module 1 - Particle Kinetics
+  learning_objectives:
+    - Understand the relationship between position, velocity, and acceleration
+    - Select appropriate coordinate systems and be able to decompose them correctly (cartesian, polar/cylindrical, normal-tangential)
+    - Execute coordinate transformations
+    - Define kinematic variables using vector notation
+    - Solve systems of linear equations
+    - Analyze kinematic equations that require implementation of calculus
 
-  - name: Module 2 - Particle Kinetics
-    learning_objectives:
-      - id: LO1
-        description: Develop an accurate free body diagram
-      - id: LO2
-        description: Select appropriate coordinate systems and be able to apply them correctly (cartesian, polar/cylindrical, normal-tangential)
-      - id: LO3
-        description: Define forces and kinematic variables using a vector notation
-      - id: LO4
-        description: Apply Newton’s equation
-      - id: LO5
-        description: Solve systems of linear equations
-      - id: LO6
-        description: Recognize when, and what type, of friction is relevant to a problem
-      - id: LO7
-        description: Analyze two state problems using energy and momentum methods
-      - id: LO8
-        description: Construct an equation of motion
-      - id: LO9
-        description: Solve a differential equation using numerical methods and analyze the results
+2:
+  name: Module 2 - Particle Kinetics
+  learning_objectives:
+    - Develop an accurate free body diagram
+    - Select appropriate coordinate systems and be able to decompose them correctly (cartesian, polar/cylindrical, normal-tangential)
+    - Apply Newton’s second law to particle systems
+    - Analyze motion under variable mass conditions
+    - Recognize when, and what type, of friction is relevant to a problem
+    - Analyze two‐state problems using energy methods
+    - Construct equations of motion
+    - Solve a differential equation using numerical methods and analyze the results (e.g. with MATLAB)
+    - Interpret and use work–energy and impulse–momentum principles
 
-  - name: Module 3 - Particle Vibrations
-    learning_objectives:
-      - id: LO1
-        description: Develop an accurate and generalized free body diagram
-      - id: LO2
-        description: Select appropriate coordinate systems and be able to apply them correctly (cartesian, polar/cylindrical, normal-tangential)
-      - id: LO3
-        description: Construct an equation of motion
-      - id: LO4
-        description: Identify key system parameters and interpret their physical meaning
-      - id: LO5
-        description: Solve a differential equation using analytical and computational methods and analyze the results
+3:
+  name: Module 3 - Particle Vibrations
+  learning_objectives:
+    - Describe simple harmonic motion and its parameters
+    - Model mass–spring systems and derive their equations of motion
+    - Compute natural frequency and period for undamped systems
+    - Analyze the effect of damping on vibration response
+    - Sketch phase portraits for vibratory systems
 
-  - name: Module 4 - Rigid Body Kinematics
-    learning_objectives:
-      - id: LO1
-        description: Understand the relationship between position, velocity, and acceleration
-      - id: LO2
-        description: Select appropriate coordinate systems and be able to apply them correctly
-      - id: LO3
-        description: Execute coordinate transformations
-      - id: LO4
-        description: Define kinematic variables using a vector notation
-      - id: LO5
-        description: Solve systems of linear equations
-      - id: LO6
-        description: Analyze kinematic equations that require the implementation of calculus
+4:
+  name: Module 4 - Rigid Body Kinematics
+  learning_objectives:
+    - Define rigid‐body motion in planar and spatial contexts
+    - Relate relative, absolute, and transport velocities
+    - Use rotation matrices and Euler angles to represent orientation
+    - Differentiate vector quantities in rotating reference frames
+    - Apply instantaneous center of zero velocity in planar motion
+    - Compute velocities and accelerations for planar rigid‐body mechanisms
 
-  - name: Module 5 - Rigid Body Kinetics
-    learning_objectives:
-      - id: LO1
-        description: Develop an accurate free body diagram
-      - id: LO2
-        description: Select appropriate coordinate systems and be able to apply them correctly
-      - id: LO3
-        description: Define forces, moments, and kinematic variables using a vector notation
-      - id: LO4
-        description: Apply Newton’s & Euler’s laws
-      - id: LO5
-        description: Solve systems of linear equations
-      - id: LO6
-        description: Recognize when, and what type, of friction is relevant to a problem
-      - id: LO7
-        description: Analyze two state problems using energy methods
-      - id: LO8
-        description: Construct equations of motion
-      - id: LO9
-        description: Solve a differential equation using numerical methods and analyze the results (i.e. using MATLAB)
+5:
+  name: Module 5 - Rigid Body Kinetics
+  learning_objectives:
+    - Construct free‐body diagrams for rigid bodies
+    - Apply Newton’s second law for translation and rotation
+    - Relate torque, angular momentum, and moment of inertia
+    - Use energy and work methods for rigid‐body systems
+    - Solve problems involving non‐inertial reference frames
+    - Analyze systems with distributed mass (centroids, moments of inertia)
+    - Apply impulse and momentum theorems to rigid bodies
+    - Model the dynamics of connected rigid‐body assemblies
+    - Use numerical methods to integrate equations of motion
 
-  - name: Module 6 - Mechanical Vibrations of Rigid Bodies
-    learning_objectives:
-      - id: LO1
-        description: Develop an accurate and generalized free body diagram
-      - id: LO2
-        description: Perform appropriate kinematic analysis
-      - id: LO3
-        description: Construct an equation of motion
-      - id: LO4
-        description: Identify key system parameters and interpret their physical meaning
-      - id: LO5
-        description: Solve a differential equation using analytical and computational methods and analyze the results
+6:
+  name: Module 6 - Mechanical Vibrations of Rigid Bodies
+  learning_objectives:
+    - Develop an accurate and generalized free body diagram
+    - Perform appropriate kinematic analysis
+    - Construct an equation of motion for a vibrating rigid body
+    - Identify key system parameters and interpret their physical meaning
+    - Solve a differential equation using analytical and computational methods and analyze the results
