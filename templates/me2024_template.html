@@ -65,7 +65,7 @@
 <div style="background-color: #d5e0ec; padding-left: 15px;">
     <h2 style="text-align: center;"><span style="color: #000000;">Overview - Week {{ week_number }}</span></h2>
 </div>
-<p>{{ overview_statement }}</p>
+<p>{{ week.overview_statement }}</p>
 </section>
 
 <section>
@@ -97,13 +97,13 @@
 </section>
 
 <div style="background-color: #d5e0ec; padding-left: 15px;">
-    <h2 style="text-align: center;"><span style="color: #000000;">Module {{ module_number }} Learning Objectives: {{ module_number_learning_objectives }}</span></h2>
+    <h2 style="text-align: center;"><span style="color: #000000;">Module {{ week.module }} Learning Objectives: {{ module_number_learning_objectives }}</span></h2>
 </div>
 <div class="content-box">
     <div class="grid-row">
         <div class="col-md-12 col-sm-12 col-xs-12">
             <ul>
-                {% for objective in learning_objectives %}
+                {% for objective in week.learning_objectives %}
                     <li>{{ objective }}</li>
                 {% endfor %}
             </ul>
@@ -121,16 +121,16 @@
                 <div class="styleguide-section__grid-demo-element">
                     <div style="background-color: #c3ddd6; padding-left: 15px; padding-bottom: 15px;">
                         <h2 style="text-align: center;"><span style="color: #000000;">Monday</span></h2>
-                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week_start|strftime('%Y-%m-%d') }}</span></h2>
+                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week.dates[0] }}</span></h2>
                     </div>
                     <h3>Before Class</h3>
                     <h4>Prework</h4>
                     <ul>
-                        <li>N/A</li>
+                        <li>{{ week.assigned[0] }}</li>
                     </ul>
                     <h4>Referenced Reading</h4>
                     <ul>
-                        <li>N/A</li>
+                        <li> {{ week.referenced[0] }} </li>
                     </ul>
                     <hr />
                     <h3>During Class</h3>
@@ -141,16 +141,16 @@
                 <div class="styleguide-section__grid-demo-element">
                     <div style="background-color: #f6cac9; padding-left: 15px; padding-bottom: 15px;">
                         <h2 style="text-align: center;"><span style="color: #000000;">Wednesday</span></h2>
-                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week_start|add_days(2)|strftime('%Y-%m-%d') }}</span></h2>
+                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week.dates[1] }}</span></h2>
                     </div>
                     <h3>Before Class</h3>
                     <h4>Prework</h4>
                     <ul>
-                        <li>N/A</li>
+                        <li>{{ week.assigned[1] }}</li>
                     </ul>
                     <h4>Referenced Reading</h4>
                     <ul>
-                        <li>N/A</li>
+                        <li> {{ week.referenced[1] }}</li>
                     </ul>
                     <hr />
                     <h3>During Class</h3>
@@ -161,16 +161,16 @@
                 <div class="styleguide-section__grid-demo-element">
                     <div style="background-color: #d1c3d5; padding-left: 15px; padding-bottom: 15px;">
                         <h2 style="text-align: center;"><span style="color: #000000;">Friday</span></h2>
-                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week_start|add_days(4)|strftime('%Y-%m-%d') }}</span></h2>
+                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week.dates[2] }}</span></h2>
                     </div>
                     <h3>Before Class</h3>
                     <h4>Prework</h4>
                     <ul>
-                        <li>N/A</li>
+                        <li> {{ week.assigned[2] }} </li>
                     </ul>
                     <h4>Referenced Reading</h4>
                     <ul>
-                        <li>N/A</li>
+                        <li> {{ week.referenced[2] }} </li>
                     </ul>
                     <hr />
                     <h3>During Class</h3>

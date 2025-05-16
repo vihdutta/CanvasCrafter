@@ -65,9 +65,9 @@ if __name__ == "__main__":
     overview_path = "files/yaml/overview_statements.yaml"
     objectives_path = "files/yaml/learning_objectives.yaml"
 
-    weeks = populate_weeks(
+    weekly_page_data = populate_weeks(
         excel_schedule_path=excel_schedule_path,
         overview_path=overview_path,
         objectives_path=objectives_path
     )
-    print(weeks)
+    print(weekly_page_data)

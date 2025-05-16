@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from datetime import timedelta
-from files.populate_weeks.populate_weeks import populate_weeks
+from files.backend.populate_weeks import populate_weeks
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -12,6 +12,11 @@ templates.env.filters["strftime"] = lambda value, fmt: value.strftime(fmt)
 
 @app.get("/")
 async def root(request: Request):
-    weeks = populate_weeks("files/yaml/schedule.xlsx", "files/yaml/overview_statements.yaml", "files/yaml/learning_objectives.yaml")
-    return {"message": weeks}
-    # return {templates.TemplateResponse("index.html", context)}
+    # weeks = populate_weeks("files/yaml/schedule.xlsx", "files/yaml/overview_statements.yaml", "files/yaml/learning_objectives.yaml")
+    # return {"message": weeks}
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/api")
+async def api():
+    weekly_page_data = populate_weeks("files/yaml/schedule.xlsx", "files/yaml/overview_statements.yaml", "files/yaml/learning_objectives.yaml")
+    return {"message": weekly_page_data}

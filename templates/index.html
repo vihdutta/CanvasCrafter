@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMich Schedule Generator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Montserrat Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap">
+    <script>
+        tailwindConfig = {
+            theme: {
+                extend: {
+                    colors: {
+                        'umich-blue': '#00274c',
+                        'umich-maize': '#ffcb05',
+                        'canvas-blue': '#0374B5',
+                    },
+                    fontFamily: {
+                        'montserrat': ['Mondtserrat', 'Roboto'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .bg-umich-blue {
+                background-color: #00274c;
+            }
+            .bg-umich-maize {
+                background-color: #ffcb05;
+            }
+            .bg-canvas-blue {
+                background-color: #0374B5;
+            }
+            .border-umich-blue {
+                border-color: #00274c;
+            }
+            .border-umich-maize {
+                border-color: #ffcb05;
+            }
+            .border-canvas-blue {
+                border-color: #0374B5;
+            }
+            .text-umich-blue {
+                color: #00274c;
+            }
+            .text-umich-maize {
+                color: #ffcb05;
+            }
+            .text-canvas-blue {
+                color: #0374B5;
+            }
+            .hover\:bg-blue-900:hover {
+                background-color: #1e3a8a;
+            }
+            .hover\:bg-blue-700:hover {
+                background-color: #1d4ed8;
+            }
+            .font-montserrat {
+                font-family: 'Montserrat', "Roboto";
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-montserrat">
+    <!-- Header -->
+    <header class="bg-umich-blue text-white py-6 shadow-md border-b-4 border-umich-maize">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-3xl font-bold font-montserrat">UMich Schedule Generator</h1>
+        </div>
+    </header>
+    
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
+            <!-- File Upload Section -->
+            <section class="mb-8 pb-8 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-umich-blue mb-4">Upload Your Excel File</h2>
+                <p class="mb-4">Please upload your Excel file containing course data to generate possible schedules.</p>
+                
+                <div id="drop-area" class="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-gray-50 text-center hover:border-canvas-blue hover:bg-blue-50 transition-colors duration-300">
+                    <label class="block text-gray-700 font-medium mb-4">Drag & drop your file here or</label>
+                    <label class="bg-canvas-blue text-white py-3 px-5 rounded-md cursor-pointer hover:bg-blue-700 inline-block transition-colors duration-300">
+                        <input type="file" id="excel-file" accept=".xlsx, .xls" class="hidden">
+                        Choose File
+                    </label>
+                    <p id="file-name" class="mt-4 text-gray-500 italic">No file selected</p>
+                </div>
+                
+                <div class="mt-4 flex justify-center">
+                    <button id="generate-btn" disabled class="bg-umich-blue text-white py-3 px-6 rounded-md font-medium hover:bg-blue-900 transition-colors duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed">
+                        Generate Schedules
+                    </button>
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div id="loading" class="hidden mt-6 text-center">
+                    <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="mt-2 text-gray-600">Processing your file. Please wait...</p>
+                </div>
+            </section>
+            
+            <!-- Schedules Display Section -->
+            <section>
+                <h2 class="text-2xl font-bold text-umich-blue mb-4">Your Generated Schedules</h2>
+                
+                <!-- Placeholder for no schedules yet -->
+                <div id="no-schedules" class="bg-gray-50 p-6 rounded-lg text-gray-500 text-center italic">
+                    No schedules generated yet. Upload a file and click "Generate Schedules".
+                </div>
+                
+                <!-- Container for schedule tabs -->
+                <div id="schedule-tabs" class="hidden mb-4 border-b border-gray-200">
+                    <!-- Tabs will be generated here dynamically -->
+                </div>
+                
+                <!-- Container for schedule content -->
+                <div id="schedules-container" class="hidden">
+                    <!-- Schedule iframes/HTML content will be displayed here -->
+                </div>
+                
+                <!-- Container for download buttons -->
+                <div id="download-container" class="hidden mt-6 flex flex-wrap gap-4">
+                    <!-- Download buttons will be generated here dynamically -->
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <footer class="text-center py-4 text-gray-500 text-sm">
+        <p>© 2025 University of Michigan Schedule Generator</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('excel-file');
+            const fileName = document.getElementById('file-name');
+            const generateBtn = document.getElementById('generate-btn');
+            const loading = document.getElementById('loading');
+            const dropArea = document.getElementById('drop-area');
+            const noSchedules = document.getElementById('no-schedules');
+            const scheduleTabs = document.getElementById('schedule-tabs');
+            const schedulesContainer = document.getElementById('schedules-container');
+            const downloadContainer = document.getElementById('download-container');
+            
+            // File input change event
+            fileInput.addEventListener('change', function(e) {
+                if (fileInput.files.length > 0) {
+                    fileName.textContent = fileInput.files[0].name;
+                    generateBtn.disabled = false;
+                    generateBtn.classList.remove('disabled:bg-gray-300', 'disabled:cursor-not-allowed');
+                } else {
+                    fileName.textContent = 'No file selected';
+                    generateBtn.disabled = true;
+                    generateBtn.classList.add('disabled:bg-gray-300', 'disabled:cursor-not-allowed');
+                }
+            });
+            
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropArea.classList.add('border-canvas-blue', 'bg-blue-50');
+                dropArea.classList.remove('border-gray-300', 'bg-gray-50');
+            }
+            
+            function unhighlight() {
+                dropArea.classList.remove('border-canvas-blue', 'bg-blue-50');
+                dropArea.classList.add('border-gray-300', 'bg-gray-50');
+            }
+            
+            dropArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    fileName.textContent = files[0].name;
+                    generateBtn.disabled = false;
+                    generateBtn.classList.remove('disabled:bg-gray-300', 'disabled:cursor-not-allowed');
+                }
+            }
+            
+            // Generate schedules button click
+            generateBtn.addEventListener('click', function() {
+                if (!fileInput.files[0]) return;
+                
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                // Show loading spinner
+                loading.classList.remove('hidden');
+                noSchedules.classList.add('hidden');
+                scheduleTabs.classList.add('hidden');
+                schedulesContainer.classList.add('hidden');
+                downloadContainer.classList.add('hidden');
+                
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    
+                    // This is where you would call your function to process the Excel file
+                    // For now, we'll simulate a response after a delay
+                    setTimeout(function() {
+                        processExcelFile(data)
+                            .then(scheduleHtmlFiles => {
+                                displaySchedules(scheduleHtmlFiles);
+                            })
+                            .catch(error => {
+                                displayError(error);
+                            })
+                            .finally(() => {
+                                loading.classList.add('hidden');
+                            });
+                    }, 1500);
+                };
+                
+                reader.readAsArrayBuffer(file);
+            });
+            
+            // This is a placeholder for your actual function
+            // Replace this with your actual implementation
+            async function processExcelFile(data) {
+                // This is just a mock function that returns dummy HTML content
+                // Your implementation would process the Excel file and return HTML schedules
+                
+                // Simulate some processing time
+                return new Promise((resolve) => {
+                    // Return sample HTML files for demonstration
+                    resolve([
+                        {
+                            name: "Schedule Option 1",
+                            html: `<!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <style>
+                                        body { font-family: Arial, sans-serif; }
+                                        h1 { color: #00274c; }
+                                        table { border-collapse: collapse; width: 100%; }
+                                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                                        th { background-color: #00274c; color: white; }
+                                        tr:nth-child(even) { background-color: #f2f2f2; }
+                                    </style>
+                                </head>
+                                <body>
+                                    <h1>Schedule Option 1</h1>
+                                    <table>
+                                        <tr>
+                                            <th>Course</th>
+                                            <th>Time</th>
+                                            <th>Location</th>
+                                        </tr>
+                                        <tr>
+                                            <td>EECS 280</td>
+                                            <td>MWF 10:00 AM - 11:30 AM</td>
+                                            <td>EECS 1311</td>
+                                        </tr>
+                                        <tr>
+                                            <td>MATH 215</td>
+                                            <td>TTh 1:00 PM - 2:30 PM</td>
+                                            <td>East Hall 1324</td>
+                                        </tr>
+                                        <tr>
+                                            <td>CHEM 130</td>
+                                            <td>MWF 2:00 PM - 3:30 PM</td>
+                                            <td>Chemistry 1400</td>
+                                        </tr>
+                                    </table>
+                                </body>
+                                </html>`
+                        },
+                        {
+                            name: "Schedule Option 2",
+                            html: `<!DOCTYPE html>
+                                <html>
+                                <head>
+                                    <style>
+                                        body { font-family: Arial, sans-serif; }
+                                        h1 { color: #00274c; }
+                                        table { border-collapse: collapse; width: 100%; }
+                                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                                        th { background-color: #00274c; color: white; }
+                                        tr:nth-child(even) { background-color: #f2f2f2; }
+                                    </style>
+                                </head>
+                                <body>
+                                    <h1>Schedule Option 2</h1>
+                                    <table>
+                                        <tr>
+                                            <th>Course</th>
+                                            <th>Time</th>
+                                            <th>Location</th>
+                                        </tr>
+                                        <tr>
+                                            <td>EECS 280</td>
+                                            <td>TTh 8:30 AM - 10:00 AM</td>
+                                            <td>BBB 1230</td>
+                                        </tr>
+                                        <tr>
+                                            <td>MATH 215</td>
+                                            <td>MWF 11:00 AM - 12:30 PM</td>
+                                            <td>East Hall 1300</td>
+                                        </tr>
+                                        <tr>
+                                            <td>CHEM 130</td>
+                                            <td>TTh 3:00 PM - 4:30 PM</td>
+                                            <td>Chemistry 1200</td>
+                                        </tr>
+                                    </table>
+                                </body>
+                                </html>`
+                        }
+                    ]);
+                });
+            }
+            
+            function displaySchedules(scheduleHtmlFiles) {
+                if (!scheduleHtmlFiles || scheduleHtmlFiles.length === 0) {
+                    noSchedules.classList.remove('hidden');
+                    noSchedules.textContent = 'No possible schedules found. Please check your file and try again.';
+                    return;
+                }
+                
+                // Clear previous content
+                scheduleTabs.innerHTML = '';
+                schedulesContainer.innerHTML = '';
+                downloadContainer.innerHTML = '';
+                
+                // Create tabs
+                scheduleHtmlFiles.forEach((schedule, index) => {
+                    const tab = document.createElement('button');
+                    tab.textContent = schedule.name;
+                    tab.dataset.index = index;
+                    tab.className = 'px-4 py-2 font-medium focus:outline-none';
+                    
+                    if (index === 0) {
+                        tab.classList.add('border-b-2', 'border-canvas-blue', 'text-canvas-blue');
+                    } else {
+                        tab.classList.add('text-gray-500', 'hover:text-gray-700');
+                    }
+                    
+                    tab.addEventListener('click', () => {
+                        document.querySelectorAll('#schedule-tabs button').forEach(btn => {
+                            btn.classList.remove('border-b-2', 'border-canvas-blue', 'text-canvas-blue');
+                            btn.classList.add('text-gray-500', 'hover:text-gray-700');
+                        });
+                        tab.classList.remove('text-gray-500', 'hover:text-gray-700');
+                        tab.classList.add('border-b-2', 'border-canvas-blue', 'text-canvas-blue');
+                        
+                        document.querySelectorAll('#schedules-container .schedule-content').forEach(content => {
+                            content.classList.add('hidden');
+                        });
+                        document.getElementById(`schedule-content-${index}`).classList.remove('hidden');
+                    });
+                    
+                    scheduleTabs.appendChild(tab);
+                });
+                
+                // Create content containers
+                scheduleHtmlFiles.forEach((schedule, index) => {
+                    // Create content div
+                    const contentDiv = document.createElement('div');
+                    contentDiv.id = `schedule-content-${index}`;
+                    contentDiv.className = 'schedule-content bg-white rounded-lg border border-gray-200';
+                    
+                    if (index !== 0) {
+                        contentDiv.classList.add('hidden');
+                    }
+                    
+                    // Create iframe to display HTML content
+                    const iframe = document.createElement('iframe');
+                    iframe.className = 'w-full h-96 border-0';
+                    iframe.title = schedule.name;
+                    contentDiv.appendChild(iframe);
+                    
+                    schedulesContainer.appendChild(contentDiv);
+                    
+                    // Write HTML content to iframe after appending to DOM
+                    setTimeout(() => {
+                        const doc = iframe.contentDocument || iframe.contentWindow.document;
+                        doc.open();
+                        doc.write(schedule.html);
+                        doc.close();
+                    }, 0);
+                    
+                    // Create download button
+                    const downloadBtn = document.createElement('a');
+                    downloadBtn.textContent = `Download ${schedule.name}`;
+                    downloadBtn.className = 'bg-umich-blue text-white py-2 px-4 rounded hover:bg-blue-900 transition-colors duration-300';
+                    downloadBtn.href = URL.createObjectURL(new Blob([schedule.html], { type: 'text/html' }));
+                    downloadBtn.download = `${schedule.name.replace(/\s+/g, '_')}.html`;
+                    
+                    downloadContainer.appendChild(downloadBtn);
+                });
+                
+                // Show schedule sections
+                noSchedules.classList.add('hidden');
+                scheduleTabs.classList.remove('hidden');
+                schedulesContainer.classList.remove('hidden');
+                downloadContainer.classList.remove('hidden');
+            }
+            
+            function displayError(error) {
+                noSchedules.classList.remove('hidden');
+                noSchedules.innerHTML = `<div class="text-red-600">Error: ${error.message || 'An error occurred while processing the file.'}</div>`;
+                scheduleTabs.classList.add('hidden');
+                schedulesContainer.classList.add('hidden');
+                downloadContainer.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
