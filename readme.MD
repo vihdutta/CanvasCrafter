@@ -2,11 +2,11 @@
 
 Build your Canvas course pages at the speed of thought. ⚡🧠
 
-<div style="text-align: center;">
+<p align="center">
   <img src="resources/logo.png" width="450">
-</div>
+</p>
 
 
 ## ⚙️ Tech Stack
-* **Frontend:** (TBD)
+* **Frontend:** Tailwind
 * **Backend:** FastAPI, Python
