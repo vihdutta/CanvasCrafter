@@ -79,7 +79,7 @@
                         </div>
                         <p style="text-align: center;"><span style="color: #000000;">Last Week:</span> {{ last_week_text }}</p>
                         <p style="text-align: center;"><span style="color: #000000;">Next Week: {{ next_week_text }}</span></p>
-                        <p style="text-align: center;">{{ full_course_schedule_text }}</p>
+                        <p style="text-align: center;">See the Full Course Schedule</p>
                     </div>
                 </div>
             </div>
@@ -89,6 +89,32 @@
                         <div style="background-color: #d5e0ec; padding-left: 15px;">
                             <h3 style="text-align: center;"><span style="color: #000000;"><img id="36156797" role="presentation" src="https://umich.instructure.com/courses/799907/files/41036064/preview" alt="Upcoming Work Icon" width="24" height="26" data-api-endpoint="https://umich.instructure.com/api/v1/courses/799907/files/41036064" data-api-returntype="File" /> UPCOMING WORK</span></h3>
                         </div>
+                        <ul>
+                            <!-- UPCOMING WORK -->
+                            <!-- Note: "OPENS" means "assigned" -->
+
+                            <!-- DUE HW -->
+                            {% if "monday" in week and week.monday.due %}
+                                <li>{{ week.monday.due.replace("HW", "HOMEWORK ") }}: DUE {{ week.monday.date }}</li>
+                            {% endif %}
+                            {% if "wednesday" in week and week.wednesday.due %}
+                                <li>{{ week.wednesday.due.replace("HW", "HOMEWORK ") }}: DUE {{ week.wednesday.date }}</li>
+                            {% endif %}
+                            {% if "friday" in week and week.friday.due %}
+                                <li>{{ week.friday.due.replace("HW", "HOMEWORK ") }}: DUE {{ week.friday.date }}</li>
+                            {% endif %}
+
+                            <!-- ASSIGNED HW -->
+                            {% if "monday" in week and week.monday.assigned %}
+                                <li>{{ week.monday.assigned.replace("HW", "HOMEWORK ") }}: OPENS {{ week.monday.date }}</li>
+                            {% endif %}
+                            {% if "wednesday" in week and week.wednesday.assigned %}
+                                <li>{{ week.wednesday.assigned.replace("HW", "HOMEWORK ") }}: OPENS {{ week.wednesday.date }}</li>
+                            {% endif %}
+                            {% if "friday" in week and week.friday.assigned %}
+                                <li>{{ week.friday.assigned.replace("HW", "HOMEWORK ") }}: OPENS {{ week.friday.date }}</li>
+                            {% endif %}
+                        </ul>
                         </div>
                 </div>
             </div>
@@ -97,14 +123,14 @@
 </section>
 
 <div style="background-color: #d5e0ec; padding-left: 15px;">
-    <h2 style="text-align: center;"><span style="color: #000000;">Module {{ week.module }} Learning Objectives: {{ module_number_learning_objectives }}</span></h2>
+    <h2 style="text-align: center;"><span style="color: #000000;">Module {{ week.module }} Learning Objectives: {{ week.learning_objectives_topic }}</span></h2>
 </div>
 <div class="content-box">
     <div class="grid-row">
         <div class="col-md-12 col-sm-12 col-xs-12">
             <ul>
                 {% for objective in week.learning_objectives %}
-                    <li>{{ objective }}</li>
+                    <li>LO{{ loop.index }}: {{ objective }}</li>
                 {% endfor %}
             </ul>
             </div>
@@ -121,60 +147,87 @@
                 <div class="styleguide-section__grid-demo-element">
                     <div style="background-color: #c3ddd6; padding-left: 15px; padding-bottom: 15px;">
                         <h2 style="text-align: center;"><span style="color: #000000;">Monday</span></h2>
-                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week.dates[0] }}</span></h2>
+                        {% if "monday" in week and week.monday.date %}
+                            <h2 style="text-align: center;"><span style="color: #000000;">{{ week.monday.date }}</span></h2>
+                        {% endif %}
                     </div>
                     <h3>Before Class</h3>
                     <h4>Prework</h4>
                     <ul>
-                        <li>{{ week.assigned[0] }}</li>
+                        <li>Be ready to ask questions and talk with your classmates about the prework content!</li>
                     </ul>
                     <h4>Referenced Reading</h4>
                     <ul>
-                        <li> {{ week.referenced[0] }} </li>
+                        {% if "monday" in week and week.monday.referenced %}
+                            <li> Textbook: {{ week.monday.referenced }} </li>
+                        {% else %}
+                            <li> Textbook: N/A </li>
+                        {% endif %}
                     </ul>
                     <hr />
                     <h3>During Class</h3>
-                    <h4 style="font-family: 'Lato Extended', Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;">N/A</h4>
+                    <ul>
+                        <li>Class Notes: TO BE POSTED</li>
+                        <li>Class Recording: TO BE POSTED</li>
+                    </ul>
                 </div>
             </div>
             <div class="col-sm-12 col-md-12 col-lg-4">
                 <div class="styleguide-section__grid-demo-element">
                     <div style="background-color: #f6cac9; padding-left: 15px; padding-bottom: 15px;">
                         <h2 style="text-align: center;"><span style="color: #000000;">Wednesday</span></h2>
-                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week.dates[1] }}</span></h2>
+                        {% if "wednesday" in week and week.wednesday.date %}
+                            <h2 style="text-align: center;"><span style="color: #000000;">{{ week.wednesday.date }}</span></h2>
+                        {% endif %}
                     </div>
                     <h3>Before Class</h3>
                     <h4>Prework</h4>
                     <ul>
-                        <li>{{ week.assigned[1] }}</li>
+                        <li>Be ready to ask questions and talk with your classmates about the prework content!</li>
                     </ul>
                     <h4>Referenced Reading</h4>
                     <ul>
-                        <li> {{ week.referenced[1] }}</li>
+                        {% if "wednesday" in week and week.wednesday.referenced %}
+                            <li> Textbook: {{ week.wednesday.referenced }} </li>
+                        {% else %}
+                            <li> Textbook: N/A </li>
+                        {% endif %}
                     </ul>
                     <hr />
                     <h3>During Class</h3>
-                    <h4 style="font-family: 'Lato Extended', Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;">N/A</h4>
+                    <ul>
+                        <li>Class Notes: TO BE POSTED</li>
+                        <li>Class Recording: TO BE POSTED</li>
+                    </ul>
                 </div>
             </div>
             <div class="col-sm-12 col-md-12 col-lg-4">
                 <div class="styleguide-section__grid-demo-element">
                     <div style="background-color: #d1c3d5; padding-left: 15px; padding-bottom: 15px;">
                         <h2 style="text-align: center;"><span style="color: #000000;">Friday</span></h2>
-                        <h2 style="text-align: center;"><span style="color: #000000;">{{ week.dates[2] }}</span></h2>
+                        {% if "friday" in week and week.friday.date %}
+                            <h2 style="text-align: center;"><span style="color: #000000;">{{ week.friday.date }}</span></h2>
+                        {% endif %}
                     </div>
                     <h3>Before Class</h3>
                     <h4>Prework</h4>
                     <ul>
-                        <li> {{ week.assigned[2] }} </li>
+                        <li>Be ready to ask questions and talk with your classmates about the prework content!</li>
                     </ul>
                     <h4>Referenced Reading</h4>
                     <ul>
-                        <li> {{ week.referenced[2] }} </li>
+                        {% if "friday" in week and week.friday.referenced %}
+                            <li> Textbook: {{ week.friday.referenced }} </li>
+                        {% else %}
+                            <li> Textbook: N/A </li>
+                        {% endif %}
                     </ul>
                     <hr />
                     <h3>During Class</h3>
-                    <h4 style="font-family: 'Lato Extended', Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;">N/A</h4>
+                    <ul>
+                        <li>Class Notes: TO BE POSTED</li>
+                        <li>Class Recording: TO BE POSTED</li>
+                    </ul>
                 </div>
             </div>
         </div>

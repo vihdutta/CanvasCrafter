@@ -1,7 +1,7 @@
 # learning objectives organized by each module
 
 1:
-  name: Module 1 - Particle Kinetics
+  learning_objectives_topic: Particle Kinetics
   learning_objectives:
     - Understand the relationship between position, velocity, and acceleration
     - Select appropriate coordinate systems and be able to decompose them correctly (cartesian, polar/cylindrical, normal-tangential)
@@ -11,7 +11,7 @@
     - Analyze kinematic equations that require implementation of calculus
 
 2:
-  name: Module 2 - Particle Kinetics
+  learning_objectives_topic: Particle Kinetics
   learning_objectives:
     - Develop an accurate free body diagram
     - Select appropriate coordinate systems and be able to decompose them correctly (cartesian, polar/cylindrical, normal-tangential)
@@ -24,7 +24,7 @@
     - Interpret and use work–energy and impulse–momentum principles
 
 3:
-  name: Module 3 - Particle Vibrations
+  learning_objectives_topic: Particle Vibrations
   learning_objectives:
     - Describe simple harmonic motion and its parameters
     - Model mass–spring systems and derive their equations of motion
@@ -33,7 +33,7 @@
     - Sketch phase portraits for vibratory systems
 
 4:
-  name: Module 4 - Rigid Body Kinematics
+  learning_objectives_topic: Rigid Body Kinematics
   learning_objectives:
     - Define rigid‐body motion in planar and spatial contexts
     - Relate relative, absolute, and transport velocities
@@ -43,7 +43,7 @@
     - Compute velocities and accelerations for planar rigid‐body mechanisms
 
 5:
-  name: Module 5 - Rigid Body Kinetics
+  learning_objectives_topic: Rigid Body Kinetics
   learning_objectives:
     - Construct free‐body diagrams for rigid bodies
     - Apply Newton’s second law for translation and rotation
@@ -56,7 +56,7 @@
     - Use numerical methods to integrate equations of motion
 
 6:
-  name: Module 6 - Mechanical Vibrations of Rigid Bodies
+  learning_objectives_topic: Mechanical Vibrations of Rigid Bodies
   learning_objectives:
     - Develop an accurate and generalized free body diagram
     - Perform appropriate kinematic analysis

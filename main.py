@@ -1,9 +1,10 @@
-import os
 import uuid
-import shutil
-from fastapi import FastAPI, Request, UploadFile, File, HTTPException, status
+import os
+from fastapi import FastAPI, Request, UploadFile, File, HTTPException, status, Cookie, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import StreamingResponse
+from files.backend.build_html import build_from_upload
 from files.backend.populate_weeks import populate_weeks
 
 app = FastAPI()
@@ -35,7 +36,10 @@ async def api():
 
 
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(
+    response: Response,
+    file: UploadFile = File(...)
+):
     if not allowed_file(file.filename):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -49,15 +53,20 @@ async def upload_file(file: UploadFile = File(...)):
             detail=f"File too large (max {MAX_FILE_SIZE // (1024 * 1024)} MB)",
         )
 
-    ext = os.path.splitext(file.filename)[1].lower()
-    unique_name = f"{uuid.uuid4().hex}{ext}"
-    dest_path = os.path.join(UPLOAD_DIR, unique_name)
+    unique_filename = build_from_upload(file, uuid, UPLOAD_DIR, contents)
 
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-    with open(dest_path, "wb") as out:
-        out.write(contents)
+    # returns identifier for the folder created that contains the week files
+    # if the user chooses to download the html files, then the cookie will
+    # be used to determine which folder on the server to serve back and delete
+    response.set_cookie(
+        key="last_uploaded_file_identifier",
+        value=os.path.basename(unique_filename),
+        max_age=3600,
+        httponly=True,
+        samesite="lax"
+    )
 
-    return {"filename": unique_name, "url": f"/uploads/{unique_name}"}
+    return {"filename": unique_filename, "url": f"/uploads/{unique_filename}"}
 
 
 def allowed_file(filename: str) -> bool:
