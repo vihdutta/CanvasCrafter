@@ -40,7 +40,7 @@ def build_html(weeks_data, unique_identifier="page"):
 
     print(f"Rendered HTML files for all weeks in: {output_dir}")
 
-# builds the html files from the upload, returns the 
+# builds the html files from the upload, returns the file_name that was created.
 def build_from_upload(file, uuid, UPLOAD_DIR, contents) -> str:
     ext = os.path.splitext(file.filename)[1].lower()
     unique_identifier = uuid.uuid4().hex
@@ -62,6 +62,7 @@ def build_from_upload(file, uuid, UPLOAD_DIR, contents) -> str:
     )
 
     build_html(weekly_page_data, unique_identifier=unique_identifier)
+    os.remove(excel_schedule_path)
 
     return unique_filename
 

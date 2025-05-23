@@ -1,11 +1,13 @@
 import uuid
 import os
+import glob
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException, status, Cookie, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import StreamingResponse
 from files.backend.build_html import build_from_upload
 from files.backend.populate_weeks import populate_weeks
+from files.backend.zip_built_htmls import zip_stream
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -60,7 +62,7 @@ async def upload_file(
     # be used to determine which folder on the server to serve back and delete
     response.set_cookie(
         key="last_uploaded_file_identifier",
-        value=os.path.basename(unique_filename),
+        value=os.path.splitext(unique_filename)[0],
         max_age=3600,
         httponly=True,
         samesite="lax"
@@ -71,3 +73,91 @@ async def upload_file(
 
 def allowed_file(filename: str) -> bool:
     return filename.lower().endswith((".xlsx", ".xls"))
+
+# when "Generate Pages" is pressed, preview each of the generated pages.
+@app.get("/generate")
+async def generate(path: str):
+    try:
+        # the unique identifier == the filename (without extension)
+        filename = os.path.basename(path)
+        unique_identifier = os.path.splitext(filename)[0]
+        
+        # find the generated HTML files folder
+        temp_dir = os.path.join("temp", unique_identifier)
+        if not os.path.exists(temp_dir):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Generated files folder not found"
+            )
+        
+        html_files = glob.glob(os.path.join(temp_dir, "*.html"))
+        
+        if not html_files:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No generated files found"
+            )
+        
+        # return each HTML file as json
+        page_data = []
+        for html_file in html_files:
+            filename = os.path.basename(html_file)
+            # extract week name from filename (format: week_N_identifier.html)
+            week_name = filename.replace(f"_{unique_identifier}.html", "").replace("_", " ").title()
+            
+            with open(html_file, 'r', encoding='utf-8') as f:
+                html_content = f.read()
+            
+            page_data.append({
+                "name": week_name,
+                "html": html_content
+            })
+
+        # sort the weeks numerically by extracting the week number
+        def get_week_number(item):
+            try:
+                # Extract the number from "Week N"
+                return int(item["name"].lower().replace("week ", ""))
+            except (ValueError, AttributeError):
+                return float('inf')  # Put non-numeric weeks at the end
+                
+        page_data = sorted(page_data, key=get_week_number)
+        
+        return page_data
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error generating pages: {str(e)}"
+        )
+
+
+@app.get("/download")
+async def download_all(last_uploaded_file_identifier: str = Cookie(None)):
+    """Download all generated HTML files as a zip using the cookie identifier"""
+    if not last_uploaded_file_identifier:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No file identifier found in cookies"
+        )
+    
+    # Look for generated HTML files in temp directory
+    temp_dir = os.path.join("temp", last_uploaded_file_identifier)
+    print(last_uploaded_file_identifier)
+    if not os.path.exists(temp_dir):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Generated files not found"
+        )
+    
+    # Find all HTML files in the temp directory
+    html_files = glob.glob(os.path.join(temp_dir, "*.html"))
+    
+    if not html_files:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No HTML files found to download"
+        )
+    
+    # Create and return zip file
+    return zip_stream(html_files)

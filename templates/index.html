@@ -48,9 +48,10 @@
     </div>
   </header>
 
-  <main class="container mx-auto px-4 py-8">
+  <main class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Upload Section -->
     <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
-      <section class="mb-8 pb-8 border-b border-gray-200">
+      <section class="pb-8">
         <h2 class="text-2xl font-bold text-umich-blue mb-4">Upload Your Excel File</h2>
         <p class="mb-4">Please upload your Excel file containing a course schedule to generate the Canvas pages.</p>
 
@@ -63,9 +64,12 @@
           <p id="file-name" class="mt-4 text-gray-500 italic">No file selected</p>
         </div>
 
-        <div class="mt-4 flex justify-center">
+        <div class="mt-4 flex justify-center gap-4">
           <button id="generate-btn" disabled class="bg-umich-blue text-white py-3 px-6 rounded-md font-medium hover:bg-blue-900 transition-colors duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed">
             Generate Pages
+          </button>
+          <button id="download-all-btn" disabled class="bg-umich-blue text-white py-3 px-6 rounded-md font-medium hover:bg-blue-900 transition-colors duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed">
+            Download All
           </button>
         </div>
 
@@ -74,15 +78,22 @@
           <p class="mt-2 text-gray-600">Processing your file. Please wait...</p>
         </div>
       </section>
+    </div>
 
+    <!-- Generated Pages Section -->
+    <div class="bg-white rounded-lg shadow-md p-6">
       <section>
         <h2 class="text-2xl font-bold text-umich-blue mb-4">Your Generated Pages</h2>
         <div id="no-pages" class="bg-gray-50 p-6 rounded-lg text-gray-500 text-center italic">
           No pages generated yet. Upload a file and click "Generate Pages".
         </div>
         <div id="page-tabs" class="hidden mb-4 border-b border-gray-200"></div>
-        <div id="pages-container" class="hidden"></div>
-        <div id="download-pages-container" class="hidden mt-6 flex flex-wrap gap-4"></div>
+        <div id="pages-container" class="hidden px-8">
+          <!-- Pages will be inserted here -->
+        </div>
+        <div id="download-pages-container" class="hidden mt-6 flex justify-center">
+          <!-- Download buttons will be inserted here -->
+        </div>
       </section>
     </div>
   </main>
@@ -96,6 +107,7 @@
       const fileInput = document.getElementById('excel-file');
       const fileName = document.getElementById('file-name');
       const generateBtn = document.getElementById('generate-btn');
+      const downloadAllBtn = document.getElementById('download-all-btn');
       const loading = document.getElementById('loading');
       const dropArea = document.getElementById('drop-area');
       const noPages = document.getElementById('no-pages');
@@ -133,6 +145,30 @@
         }
       });
 
+      // Download All button click handler
+      downloadAllBtn.addEventListener('click', async () => {
+        try {
+          const response = await fetch('/download');
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to download files');
+          }
+          
+          // Create a blob from the response and trigger download
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'all_html_files.zip';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } catch (err) {
+          alert(`Error downloading files: ${err.message}`);
+        }
+      });
+
       // Generate & upload
       generateBtn.addEventListener('click', async () => {
         if (!fileInput.files[0]) return;
@@ -142,6 +178,7 @@
         pageTabs.classList.add('hidden');
         pagesContainer.classList.add('hidden');
         downloadPagesContainer.classList.add('hidden');
+        downloadAllBtn.disabled = true; // Disable download button during generation
 
         const form = new FormData();
         form.append('file', fileInput.files[0], fileInput.files[0].name);
@@ -158,6 +195,8 @@
           const pageHtmlFiles = await genRes.json();
 
           displayPages(pageHtmlFiles);
+          // Enable download button after successful generation
+          downloadAllBtn.disabled = false;
         } catch (err) {
           displayError(err);
         } finally {
@@ -200,17 +239,21 @@
 
             document.querySelectorAll('.page-content').forEach(c => c.classList.add('hidden'));
             document.getElementById(`page-content-${i}`).classList.remove('hidden');
+
+            // Show only the download button for the selected week
+            document.querySelectorAll('.download-button').forEach(btn => btn.classList.add('hidden'));
+            document.getElementById(`download-btn-${i}`).classList.remove('hidden');
           };
           pageTabs.appendChild(tab);
 
-          // content iframe
+          // content iframe with increased padding
           const contentDiv = document.createElement('div');
           contentDiv.id = `page-content-${i}`;
-          contentDiv.className = 'page-content bg-white rounded-lg border border-gray-200';
+          contentDiv.className = 'page-content bg-white rounded-lg border border-gray-200 p-4';
           if (i !== 0) contentDiv.classList.add('hidden');
 
           const iframe = document.createElement('iframe');
-          iframe.className = 'w-full h-96 border-0';
+          iframe.className = 'w-full h-[800px] border-0'; // Made iframe taller
           iframe.title = page.name;
           contentDiv.appendChild(iframe);
           pagesContainer.appendChild(contentDiv);
@@ -223,13 +266,26 @@
             doc.close();
           });
 
-          // download link
-          const a = document.createElement('a');
-          a.textContent = `Download ${page.name}`;
-          a.className = 'bg-umich-blue text-white py-2 px-4 rounded hover:bg-blue-900 transition-colors duration-300';
-          a.href = URL.createObjectURL(new Blob([page.html], { type: 'text/html' }));
-          a.download = `${page.name.replace(/\s+/g,'_')}.html`;
-          downloadPagesContainer.appendChild(a);
+          // download button (only visible for the first tab initially)
+          const downloadBtn = document.createElement('button');
+          downloadBtn.id = `download-btn-${i}`;
+          downloadBtn.textContent = `Download ${page.name}`;
+          downloadBtn.className = 'download-button bg-umich-blue text-white py-3 px-8 rounded-md hover:bg-blue-900 transition-colors duration-300 shadow-sm mx-auto';
+          if (i !== 0) downloadBtn.classList.add('hidden');
+          
+          downloadBtn.onclick = () => {
+            const blob = new Blob([page.html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${page.name.replace(/\s+/g,'_')}.html`;
+            document.body.appendChild(a);
+            a.click();
+            URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          };
+          
+          downloadPagesContainer.appendChild(downloadBtn);
         });
 
         noPages.classList.add('hidden');
@@ -244,6 +300,7 @@
         pageTabs.classList.add('hidden');
         pagesContainer.classList.add('hidden');
         downloadPagesContainer.classList.add('hidden');
+        downloadAllBtn.disabled = true; // Disable download button on error
       }
     });
   </script>
