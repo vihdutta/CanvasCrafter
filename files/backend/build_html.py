@@ -54,11 +54,13 @@ def build_from_upload(file, uuid, UPLOAD_DIR, contents) -> str:
     excel_schedule_path = f"uploads/{unique_filename}"
     overview_path = "files/yaml/overview_statements.yaml"
     objectives_path = "files/yaml/learning_objectives.yaml"
+    images_path = "files/yaml/images.yaml"
 
     weekly_page_data = populate_weeks(
         excel_schedule_path=excel_schedule_path,
         overview_path=overview_path,
-        objectives_path=objectives_path
+        objectives_path=objectives_path,
+        images_path=images_path
     )
 
     build_html(weekly_page_data, unique_identifier=unique_identifier)
@@ -70,11 +72,13 @@ if __name__ == "__main__":
     excel_schedule_path = "files/yaml/schedule.xlsx"
     overview_path = "files/yaml/overview_statements.yaml"
     objectives_path = "files/yaml/learning_objectives.yaml"
+    images_path = "files/yaml/images.yaml"
 
     weekly_page_data = populate_weeks(
         excel_schedule_path=excel_schedule_path,
         overview_path=overview_path,
-        objectives_path=objectives_path
+        objectives_path=objectives_path,
+        images_path=images_path
     )
 
     build_html(weekly_page_data)

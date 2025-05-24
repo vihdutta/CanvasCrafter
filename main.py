@@ -1,12 +1,13 @@
+from typing import List
 import uuid
 import os
 import glob
 from fastapi import FastAPI, Request, UploadFile, File, HTTPException, status, Cookie, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import StreamingResponse
 from files.backend.build_html import build_from_upload
 from files.backend.populate_weeks import populate_weeks
+from files.backend.upload_to_canvas import upload_page
 from files.backend.zip_built_htmls import zip_stream
 
 app = FastAPI()
@@ -19,8 +20,6 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 @app.get("/")
 async def root(request: Request):
-    # weeks = populate_weeks("files/yaml/schedule.xlsx", "files/yaml/overview_statements.yaml", "files/yaml/learning_objectives.yaml")
-    # return {"message": weeks}
     return templates.TemplateResponse("index.html", {"request": request})
 
 
@@ -30,13 +29,14 @@ async def api():
         "files/yaml/schedule.xlsx",
         "files/yaml/overview_statements.yaml",
         "files/yaml/learning_objectives.yaml",
+        "files/yaml/images.yaml"
     )
     return {"message": weekly_page_data}
 
 
-# helper functions, not sites
+# helper functions, not pages
 
-
+# handles the excel file being uploaded to the server and building the HTML files automatically
 @app.post("/upload")
 async def upload_file(
     response: Response,
@@ -116,10 +116,10 @@ async def generate(path: str):
         # sort the weeks numerically by extracting the week number
         def get_week_number(item):
             try:
-                # Extract the number from "Week N"
+                # extract the number from "Week N"
                 return int(item["name"].lower().replace("week ", ""))
             except (ValueError, AttributeError):
-                return float('inf')  # Put non-numeric weeks at the end
+                return float('inf')  # non-numeric weeks at the end
                 
         page_data = sorted(page_data, key=get_week_number)
         
@@ -131,17 +131,35 @@ async def generate(path: str):
             detail=f"Error generating pages: {str(e)}"
         )
 
-
+# download all generated HTML files as a zip using the cookie identifier
 @app.get("/download")
 async def download_all(last_uploaded_file_identifier: str = Cookie(None)):
-    """Download all generated HTML files as a zip using the cookie identifier"""
+    html_files = retrieve_generated_files(last_uploaded_file_identifier)
+    return zip_stream(html_files)
+
+@app.get("/upload-to-canvas")
+async def upload_to_canvas(last_uploaded_file_identifier: str = Cookie(None)):
+    html_files = retrieve_generated_files(last_uploaded_file_identifier)
+
+    for filepath in html_files:
+        try:
+            title = os.path.splitext(os.path.basename(filepath))[0].replace("_", " ").title()
+            with open(filepath, "r", encoding="utf-8") as f:
+                html_content = f.read()
+
+            result = upload_page(title, html_content)
+            print(f"Created page '{result['title']}' (ID: {result['page_id']}) at URL: {result['url']}")
+        except Exception as e:
+            print(f"Failed to upload '{title}': {e}")
+    
+async def retrieve_generated_files(last_uploaded_file_identifier: str = Cookie(None)) -> List[str]:
     if not last_uploaded_file_identifier:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No file identifier found in cookies"
         )
     
-    # Look for generated HTML files in temp directory
+    # look for generated HTML files in temp directory
     temp_dir = os.path.join("temp", last_uploaded_file_identifier)
     print(last_uploaded_file_identifier)
     if not os.path.exists(temp_dir):
@@ -150,7 +168,7 @@ async def download_all(last_uploaded_file_identifier: str = Cookie(None)):
             detail="Generated files not found"
         )
     
-    # Find all HTML files in the temp directory
+    # find all HTML files in the temp directory
     html_files = glob.glob(os.path.join(temp_dir, "*.html"))
     
     if not html_files:
@@ -159,5 +177,4 @@ async def download_all(last_uploaded_file_identifier: str = Cookie(None)):
             detail="No HTML files found to download"
         )
     
-    # Create and return zip file
-    return zip_stream(html_files)
+    return html_files

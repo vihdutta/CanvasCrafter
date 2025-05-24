@@ -127,13 +127,19 @@
 </div>
 <div class="content-box">
     <div class="grid-row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="col-md-7 col-sm-12 col-xs-12">
             <ul>
                 {% for objective in week.learning_objectives %}
                     <li>LO{{ loop.index }}: {{ objective }}</li>
                 {% endfor %}
             </ul>
-            </div>
+        </div>
+        <div class="col-md-5 col-sm-12 col-xs-12">
+            <figure style="text-align: center; border: 1px solid black; padding: 10px;">
+                <img src="{{ week.image.image_path }}" style="max-width: 100%; height: auto;" alt="Module diagram">
+                <figcaption>{{ week.image.caption }}</figcaption>
+            </figure>
+        </div>
     </div>
 </div>
 

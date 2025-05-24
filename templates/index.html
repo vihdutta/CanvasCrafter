@@ -52,7 +52,7 @@
     <!-- Upload Section -->
     <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
       <section class="pb-8">
-        <h2 class="text-2xl font-bold text-umich-blue mb-4">Upload Your Excel File</h2>
+        <h2 class="text-2xl font-bold text-umich-blue mb-4 text-center">Upload Your Excel File</h2>
         <p class="mb-4">Please upload your Excel file containing a course schedule to generate the Canvas pages.</p>
 
         <div id="drop-area" class="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-gray-50 text-center hover:border-canvas-blue hover:bg-blue-50 transition-colors duration-300">
@@ -71,6 +71,19 @@
           <button id="download-all-btn" disabled class="bg-umich-blue text-white py-3 px-6 rounded-md font-medium hover:bg-blue-900 transition-colors duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed">
             Download All
           </button>
+          <button id="upload-canvas-btn" disabled class="bg-red-600 text-white py-3 px-6 rounded-md font-medium hover:bg-red-700 transition-colors duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed">
+            Upload to Canvas
+          </button>
+        </div>
+
+        <!-- Success/Error messages for Canvas upload -->
+        <div id="canvas-upload-message" class="hidden mt-4 text-center">
+          <div id="canvas-success" class="hidden p-3 bg-green-100 border border-green-400 text-green-700 rounded-md">
+            ✓ Successfully uploaded to Canvas!
+          </div>
+          <div id="canvas-error" class="hidden p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
+            <span id="canvas-error-text">Failed to upload to Canvas.</span>
+          </div>
         </div>
 
         <div id="loading" class="hidden mt-6 text-center">
@@ -83,7 +96,7 @@
     <!-- Generated Pages Section -->
     <div class="bg-white rounded-lg shadow-md p-6">
       <section>
-        <h2 class="text-2xl font-bold text-umich-blue mb-4">Your Generated Pages</h2>
+        <h2 class="text-2xl font-bold text-umich-blue mb-4 text-center">Your Generated Pages</h2>
         <div id="no-pages" class="bg-gray-50 p-6 rounded-lg text-gray-500 text-center italic">
           No pages generated yet. Upload a file and click "Generate Pages".
         </div>
@@ -108,12 +121,17 @@
       const fileName = document.getElementById('file-name');
       const generateBtn = document.getElementById('generate-btn');
       const downloadAllBtn = document.getElementById('download-all-btn');
+      const uploadCanvasBtn = document.getElementById('upload-canvas-btn');
       const loading = document.getElementById('loading');
       const dropArea = document.getElementById('drop-area');
       const noPages = document.getElementById('no-pages');
       const pageTabs = document.getElementById('page-tabs');
       const pagesContainer = document.getElementById('pages-container');
       const downloadPagesContainer = document.getElementById('download-pages-container');
+      const canvasUploadMessage = document.getElementById('canvas-upload-message');
+      const canvasSuccess = document.getElementById('canvas-success');
+      const canvasError = document.getElementById('canvas-error');
+      const canvasErrorText = document.getElementById('canvas-error-text');
 
       // File selection
       fileInput.addEventListener('change', () => {
@@ -179,6 +197,7 @@
         pagesContainer.classList.add('hidden');
         downloadPagesContainer.classList.add('hidden');
         downloadAllBtn.disabled = true; // Disable download button during generation
+        uploadCanvasBtn.disabled = true; // Disable upload to canvas button during generation
 
         const form = new FormData();
         form.append('file', fileInput.files[0], fileInput.files[0].name);
@@ -197,6 +216,8 @@
           displayPages(pageHtmlFiles);
           // Enable download button after successful generation
           downloadAllBtn.disabled = false;
+          // Enable upload to canvas button after successful generation
+          uploadCanvasBtn.disabled = false;
         } catch (err) {
           displayError(err);
         } finally {
@@ -301,6 +322,7 @@
         pagesContainer.classList.add('hidden');
         downloadPagesContainer.classList.add('hidden');
         downloadAllBtn.disabled = true; // Disable download button on error
+        uploadCanvasBtn.disabled = true; // Disable upload to canvas button on error
       }
     });
   </script>

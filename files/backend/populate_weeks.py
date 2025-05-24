@@ -9,19 +9,21 @@ def populate_weeks(
     excel_schedule_path: str,
     overview_path: str,
     objectives_path: str,
+    images_path: str
 ):
     DATA_START_ROW = 1
     df = pd.read_excel(excel_schedule_path, engine="openpyxl")
     weeks_column = df.iloc[DATA_START_ROW:, 1].ffill().astype(int)
     df = df.replace(np.nan, "")
 
-    overview_data, objective_data = read_overview_and_objective_yaml(overview_path, objectives_path)
+    overview_data, objective_data, images_data = read_overview_and_objective_yaml(overview_path, objectives_path, images_path)
 
     weeks = {}
     for w in set(weeks_column):
         weeks[w] = {}
         weeks[w]["module"] = ""
         weeks[w]["overview_statement"] = overview_data[w]["description"]
+        weeks[w]["image"] = images_data[w]
 
     for index, row in df.iterrows():
         if index == 0:
@@ -60,28 +62,33 @@ def populate_weeks(
 
 def read_overview_and_objective_yaml(
     overview_path: str,
-    objectives_path: str
+    objectives_path: str,
+    images_path: str
 ):
     overview_data = {}
     objective_data = {}
-    if overview_path:
-        with open(overview_path, "r", encoding="utf-8") as f:
-            overview_data = yaml.safe_load(f)
-    if objectives_path:
-        with open(objectives_path, "r", encoding="utf-8") as f:
-            objective_data = yaml.safe_load(f)
+    images_data = {}
 
-    return (overview_data, objective_data)
+    with open(overview_path, "r", encoding="utf-8") as f:
+        overview_data = yaml.safe_load(f)
+    with open(objectives_path, "r", encoding="utf-8") as f:
+        objective_data = yaml.safe_load(f)
+    with open(images_path, "r", encoding="utf-8") as f:
+        images_data = yaml.safe_load(f)
+
+    return (overview_data, objective_data, images_data)
 
 
 if __name__ == "__main__":
     excel_schedule_path = "files/yaml/schedule.xlsx"
     overview_path = "files/yaml/overview_statements.yaml"
     objectives_path = "files/yaml/learning_objectives.yaml"
+    images_path = "files/yaml/images.yaml"
 
     weekly_page_data = populate_weeks(
         excel_schedule_path=excel_schedule_path,
         overview_path=overview_path,
-        objectives_path=objectives_path
+        objectives_path=objectives_path,
+        images_path=images_path
     )
     print(weekly_page_data)
