@@ -18,7 +18,8 @@ def upload_page(title: str, html_content: str):
     data = {
         "wiki_page[title]": title,
         "wiki_page[body]": html_content,
-        "wiki_page[published]": True
+        "wiki_page[published]": True,
+        "on_duplicate": "overwrite"
     }
 
     # try updating the page

@@ -77,8 +77,8 @@
                         <div style="background-color: #d5e0ec; padding-left: 15px;">
                             <h3 style="text-align: center;"><img id="36156766" role="presentation" src="https://umich.instructure.com/courses/799907/files/41036074/preview" alt="Schedule Icon" width="47" height="32" data-api-endpoint="https://umich.instructure.com/api/v1/courses/799907/files/41036074" data-api-returntype="File" /><span style="color: #000000;"> Schedule Info</span></h3>
                         </div>
-                        <p style="text-align: center;"><span style="color: #000000;">Last Week:</span> {{ last_week_text }}</p>
-                        <p style="text-align: center;"><span style="color: #000000;">Next Week: {{ next_week_text }}</span></p>
+                        <p style="text-align: center;"><span style="color: #000000;">Last Week:</span> {{ last_week_text|safe }}</p>
+                        <p style="text-align: center;"><span style="color: #000000;">Next Week:</span> {{ next_week_text|safe }}</p>
                         <p style="text-align: center;">See the Full Course Schedule</p>
                     </div>
                 </div>

@@ -1,4 +1,5 @@
 import os
+import re
 from typing import List
 from jinja2 import Environment, FileSystemLoader
 
@@ -24,12 +25,35 @@ def build_html(weeks_data, unique_identifier="page"):
     template = env.get_template('me2024_template.html')
 
     keys = sorted(weeks_data.keys(), key=int)
-    for key in keys:
+    course_id = "799908"
+    
+    for i, key in enumerate(keys):
         curr_week = weeks_data[key]
+        
+        # Generate navigation links
+        prev_week_num = int(key) - 1
+        next_week_num = int(key) + 1
+        
+        # Create URL-safe slugs
+        prev_slug = f"week-{prev_week_num}" if prev_week_num > 0 else None
+        next_slug = f"week-{next_week_num}" if i < len(keys) - 1 else None
+        
+        # Generate navigation text with links
+        if prev_slug:
+            last_week_text = f'<a href="https://umich.instructure.com/courses/{course_id}/pages/{prev_slug}">Week {prev_week_num}</a>'
+        else:
+            last_week_text = "N/A"
+            
+        if next_slug:
+            next_week_text = f'<a href="https://umich.instructure.com/courses/{course_id}/pages/{next_slug}">Week {next_week_num}</a>'
+        else:
+            next_week_text = "N/A"
 
         html = template.render(
             week=curr_week,
-            week_number=key
+            week_number=key,
+            last_week_text=last_week_text,
+            next_week_text=next_week_text
         )
 
         # write each HTML file to the unique output subdirectory
