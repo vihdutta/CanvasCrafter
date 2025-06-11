@@ -72,8 +72,9 @@
             Download All
           </button>
           <button id="upload-canvas-btn" disabled class="bg-red-600 text-white py-3 px-6 rounded-md font-medium hover:bg-red-700 transition-colors duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed">
-            Upload to Canvas
+            Upload All to Canvas
           </button>
+
         </div>
 
         <!-- Success/Error messages for Canvas upload -->
@@ -95,12 +96,14 @@
           </div>
           
           <div id="canvas-success" class="hidden p-3 bg-green-100 border border-green-400 text-green-700 rounded-md">
-            ✓ Successfully uploaded all pages to Canvas!
+            ✓ Successfully uploaded all items to Canvas!
           </div>
           <div id="canvas-error" class="hidden p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
-            <span id="canvas-error-text">Failed to upload to Canvas.</span>
+            <span id="canvas-error-text">Failed to upload items to Canvas.</span>
           </div>
         </div>
+
+
 
         <div id="loading" class="hidden mt-6 text-center">
           <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -125,6 +128,66 @@
         </div>
       </section>
     </div>
+
+    <!-- Course ID Configuration Section -->
+    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+      <section>
+        <h2 class="text-2xl font-bold text-umich-blue mb-4 text-center">Canvas Configuration</h2>
+        <div class="max-w-md mx-auto space-y-4">
+          <!-- Course ID Input -->
+          <div>
+            <label for="course-id-input" class="block text-sm font-medium text-gray-700 mb-2">
+              Canvas Course ID
+            </label>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="course-id-input"
+                placeholder="Enter your Canvas course ID"
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-umich-blue focus:border-transparent"
+              />
+              <button
+                id="course-id-save"
+                class="px-4 py-2 bg-umich-blue text-white rounded-md hover:bg-blue-900 transition-colors duration-300 font-medium"
+              >
+                Save
+              </button>
+            </div>
+            <div id="course-id-status" class="text-sm text-gray-600 mt-1">
+              Loading course ID...
+            </div>
+          </div>
+          
+          <!-- Access Token Input -->
+          <div>
+            <label for="access-token-input" class="block text-sm font-medium text-gray-700 mb-2">
+              Canvas API Access Token
+            </label>
+            <div class="flex gap-2">
+              <input
+                type="password"
+                id="access-token-input"
+                placeholder="Enter your Canvas API access token"
+                class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-umich-blue focus:border-transparent"
+              />
+              <button
+                id="access-token-save"
+                class="px-4 py-2 bg-umich-blue text-white rounded-md hover:bg-blue-900 transition-colors duration-300 font-medium"
+              >
+                Save
+              </button>
+            </div>
+            <div id="access-token-status" class="text-sm text-gray-600 mt-1">
+              Loading access token...
+            </div>
+          </div>
+          
+          <p class="text-xs text-gray-500 mt-2">
+            These credentials are used for Canvas operations and will be stored securely in your browser.
+          </p>
+        </div>
+      </section>
+    </div>
   </main>
 
   <footer class="text-center py-4 text-gray-500 text-sm">
@@ -132,12 +195,31 @@
   </footer>
 
   <script>
+    // Cookie utility functions (defined globally)
+    function setCookie(name, value, days) {
+      const expires = new Date();
+      expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+      document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+    }
+
+    function getCookie(name) {
+      const nameEQ = name + "=";
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+      }
+      return null;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const fileInput = document.getElementById('excel-file');
       const fileName = document.getElementById('file-name');
       const generateBtn = document.getElementById('generate-btn');
       const downloadAllBtn = document.getElementById('download-all-btn');
       const uploadCanvasBtn = document.getElementById('upload-canvas-btn');
+
       const loading = document.getElementById('loading');
       const dropArea = document.getElementById('drop-area');
       const noPages = document.getElementById('no-pages');
@@ -148,6 +230,7 @@
       const canvasSuccess = document.getElementById('canvas-success');
       const canvasError = document.getElementById('canvas-error');
       const canvasErrorText = document.getElementById('canvas-error-text');
+
 
       // File selection
       fileInput.addEventListener('change', () => {
@@ -207,6 +290,14 @@
       generateBtn.addEventListener('click', async () => {
         if (!fileInput.files[0]) return;
 
+        // Check if course ID and access token are set
+        const courseId = getCookie('course_id');
+        const accessToken = getCookie('access_token');
+        if (!courseId || !accessToken) {
+          alert('Please set both Course ID and Access Token in the Canvas Configuration section below before generating pages.');
+          return;
+        }
+
         loading.classList.remove('hidden');
         noPages.classList.add('hidden');
         pageTabs.classList.add('hidden');
@@ -214,6 +305,7 @@
         downloadPagesContainer.classList.add('hidden');
         downloadAllBtn.disabled = true; // Disable download button during generation
         uploadCanvasBtn.disabled = true; // Disable upload to canvas button during generation
+
 
         const form = new FormData();
         form.append('file', fileInput.files[0], fileInput.files[0].name);
@@ -235,7 +327,12 @@
           // Enable upload to canvas button after successful generation
           uploadCanvasBtn.disabled = false;
         } catch (err) {
-          displayError(err);
+          // Check if it's a configuration error
+          if (err.detail && (err.detail.includes('Course ID') || err.detail.includes('Access Token'))) {
+            displayError({detail: 'Course ID and Access Token are required. Please set them in the Canvas Configuration section below.'});
+          } else {
+            displayError(err);
+          }
         } finally {
           // hide spinner
           loading.classList.add('hidden');
@@ -258,11 +355,21 @@
         pagesContainer.innerHTML = '';
         downloadPagesContainer.innerHTML = '';
 
-        pageHtmlFiles.forEach((page, i) => {
+        // Separate weekly pages and homework files
+        const weeklyPages = pageHtmlFiles.filter(page => page.type === 'weekly');
+        const homeworkPages = pageHtmlFiles.filter(page => page.type === 'homework');
+
+        // Combine for display (weekly first, then homework)
+        const allPages = [...weeklyPages, ...homeworkPages];
+
+        allPages.forEach((page, i) => {
           // tab
           const tab = document.createElement('button');
           tab.textContent = page.name;
           tab.className = 'px-4 py-2 font-medium focus:outline-none';
+          if (page.type === 'homework') {
+            tab.classList.add('bg-green-100', 'text-green-700', 'border-green-200');
+          }
           if (i === 0) tab.classList.add('border-b-2','border-canvas-blue','text-canvas-blue');
           else tab.classList.add('text-gray-500','hover:text-gray-700');
           tab.onclick = () => {
@@ -329,6 +436,12 @@
         pageTabs.classList.remove('hidden');
         pagesContainer.classList.remove('hidden');
         downloadPagesContainer.classList.remove('hidden');
+        
+        // Enable buttons after successful generation
+        downloadAllBtn.disabled = false;
+        uploadCanvasBtn.disabled = false;
+        
+
       }
 
       function displayError(error) {
@@ -339,6 +452,7 @@
         downloadPagesContainer.classList.add('hidden');
         downloadAllBtn.disabled = true; // Disable download button on error
         uploadCanvasBtn.disabled = true; // Disable upload to canvas button on error
+
       }
 
       // Upload to Canvas button click handler
@@ -364,16 +478,18 @@
             switch(data.type) {
               case 'start':
                 updateProgress(0, data.total);
-                addNotification('info', `Starting upload of ${data.total} pages...`);
+                addNotification('info', `Starting upload of ${data.total} items to Canvas...`);
                 break;
                 
               case 'success':
                 updateProgress(data.current, data.total);
-                addNotification('success', `✓ Successfully uploaded "${data.title}"`);
+                const itemType = data.item_type === 'homework' ? 'assignment' : 'page';
+                addNotification('success', `✓ Successfully uploaded ${itemType} "${data.title}"`);
                 break;
                 
               case 'error':
-                addNotification('error', `✗ Failed to upload "${data.title}": ${data.error}`);
+                const failedItemType = data.item_type === 'homework' ? 'assignment' : 'page';
+                addNotification('error', `✗ Failed to upload ${failedItemType} "${data.title}": ${data.error}`);
                 break;
                 
               case 'complete':
@@ -382,15 +498,15 @@
                 
                 if (data.success_count === data.total) {
                   canvasSuccess.classList.remove('hidden');
-                  addNotification('success', `🎉 All ${data.success_count} pages uploaded successfully!`);
+                  addNotification('success', `🎉 All ${data.success_count} items uploaded successfully to Canvas!`);
                 } else {
                   canvasError.classList.remove('hidden');
-                  canvasErrorText.textContent = `Uploaded ${data.success_count} out of ${data.total} pages. Some uploads failed.`;
+                  canvasErrorText.textContent = `Uploaded ${data.success_count} out of ${data.total} items to Canvas. Some uploads failed.`;
                 }
                 
                 // Re-enable button
                 uploadCanvasBtn.disabled = false;
-                uploadCanvasBtn.textContent = 'Upload to Canvas';
+                uploadCanvasBtn.textContent = 'Upload All to Canvas';
                 break;
             }
           };
@@ -403,7 +519,7 @@
             
             // Re-enable button
             uploadCanvasBtn.disabled = false;
-            uploadCanvasBtn.textContent = 'Upload to Canvas';
+            uploadCanvasBtn.textContent = 'Upload All to Canvas';
           };
           
         } catch (err) {
@@ -412,7 +528,7 @@
           
           // Re-enable button
           uploadCanvasBtn.disabled = false;
-          uploadCanvasBtn.textContent = 'Upload to Canvas';
+          uploadCanvasBtn.textContent = 'Upload All to Canvas';
         }
       });
 
@@ -457,6 +573,68 @@
         // Auto-scroll to bottom
         notificationsContainer.scrollTop = notificationsContainer.scrollHeight;
       }
+      // Canvas configuration management
+      const courseIdInput = document.getElementById('course-id-input');
+      const courseIdSaveBtn = document.getElementById('course-id-save');
+      const courseIdStatus = document.getElementById('course-id-status');
+      const accessTokenInput = document.getElementById('access-token-input');
+      const accessTokenSaveBtn = document.getElementById('access-token-save');
+      const accessTokenStatus = document.getElementById('access-token-status');
+
+      // Load course ID from cookie on page load
+      function loadCourseId() {
+        const courseId = getCookie('course_id');
+        if (courseId) {
+          courseIdInput.value = courseId;
+          courseIdStatus.textContent = `Current Course ID: ${courseId}`;
+          courseIdStatus.className = 'text-sm text-green-600 mt-1';
+        } else {
+          courseIdStatus.textContent = 'No Course ID set';
+          courseIdStatus.className = 'text-sm text-red-600 mt-1';
+        }
+      }
+
+      // Load access token from cookie on page load
+      function loadAccessToken() {
+        const accessToken = getCookie('access_token');
+        if (accessToken) {
+          accessTokenInput.value = accessToken;
+          accessTokenStatus.textContent = `Access token saved (${accessToken.substring(0, 8)}...)`;
+          accessTokenStatus.className = 'text-sm text-green-600 mt-1';
+        } else {
+          accessTokenStatus.textContent = 'No Access Token set';
+          accessTokenStatus.className = 'text-sm text-red-600 mt-1';
+        }
+      }
+
+      // Save course ID to cookie
+      courseIdSaveBtn.addEventListener('click', () => {
+        const courseId = courseIdInput.value.trim();
+        if (courseId) {
+          setCookie('course_id', courseId, 365 * 10);
+          courseIdStatus.textContent = `Course ID saved: ${courseId}`;
+          courseIdStatus.className = 'text-sm text-green-600 mt-1';
+        } else {
+          courseIdStatus.textContent = 'Please enter a valid Course ID';
+          courseIdStatus.className = 'text-sm text-red-600 mt-1';
+        }
+      });
+
+      // Save access token to cookie
+      accessTokenSaveBtn.addEventListener('click', () => {
+        const accessToken = accessTokenInput.value.trim();
+        if (accessToken) {
+          setCookie('access_token', accessToken, 365 * 10);
+          accessTokenStatus.textContent = `Access token saved (${accessToken.substring(0, 8)}...)`;
+          accessTokenStatus.className = 'text-sm text-green-600 mt-1';
+        } else {
+          accessTokenStatus.textContent = 'Please enter a valid Access Token';
+          accessTokenStatus.className = 'text-sm text-red-600 mt-1';
+        }
+      });
+
+      loadCourseId();
+      loadAccessToken();
     });
   </script>
 </body>
