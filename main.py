@@ -208,86 +208,65 @@ async def upload_to_canvas(
         )
 
         success_count = 0
-        for filepath in html_files:
+        homework_urls = {}  # Dictionary to store homework assignment URLs
+        
+        # Separate homework and weekly files
+        homework_files = [f for f in html_files if os.path.basename(f).startswith("homework_")]
+        weekly_files = [f for f in html_files if not os.path.basename(f).startswith("homework_")]
+        
+        # STEP 1: Upload homework assignments FIRST
+        for filepath in homework_files:
             try:
                 filename = os.path.basename(filepath)
-                title = (
-                    os.path.splitext(filename)[0]
-                    .replace(file_group_identifier, "")
-                    .replace("_", " ")
-                    .title()
-                    .strip()
-                )
+                hw_number = filename.split("_")[1]
+                title = f"Homework {hw_number}"
 
                 with open(filepath, "r", encoding="utf-8") as f:
                     html_content = f.read()
 
-                # Check if this is a homework file or weekly page
-                if filename.startswith("homework_"):
-                    # Handle homework assignment upload
-                    hw_number = filename.split("_")[1]
-                    title = f"Homework {hw_number}"
+                # Try to extract due date from HTML content if available
+                due_date = None
+                import re
+                due_match = re.search(r"(\d{1,2}/\d{1,2}/\d{4})", html_content)
+                if due_match:
+                    due_date = due_match.group(1)
 
-                    # Try to extract due date from HTML content if available
-                    due_date = None
-                    import re
+                result = upload_homework_assignment(
+                    title, html_content, course_id, access_token, due_date
+                )
 
-                    due_match = re.search(r"(\d{1,2}/\d{1,2}/\d{4})", html_content)
-                    if due_match:
-                        due_date = due_match.group(1)
-
-                    result = upload_homework_assignment(
-                        title, html_content, course_id, access_token, due_date
-                    )
-
-                    if result.get("success"):
-                        success_count += 1
-                        yield (
-                            "data: "
-                            + json.dumps(
-                                {
-                                    "type": "success",
-                                    "title": title,
-                                    "assignment_id": result.get("assignment_id"),
-                                    "url": result.get("url"),
-                                    "current": success_count,
-                                    "total": len(html_files),
-                                    "item_type": "homework",
-                                }
-                            )
-                            + "\n\n"
-                        )
-                    else:
-                        yield (
-                            "data: "
-                            + json.dumps(
-                                {
-                                    "type": "error",
-                                    "title": title,
-                                    "error": result.get("error", "Unknown error"),
-                                    "current": success_count,
-                                    "total": len(html_files),
-                                    "item_type": "homework",
-                                }
-                            )
-                            + "\n\n"
-                        )
-                else:
-                    # Handle weekly page upload
-                    result = upload_page(title, html_content, course_id, access_token)
+                if result.get("success"):
                     success_count += 1
-
+                    assignment_id = result.get("assignment_id")
+                    # Store the homework URL for linking in weekly pages
+                    homework_urls[title] = f"https://umich.instructure.com/courses/{course_id}/assignments/{assignment_id}"
+                    
                     yield (
                         "data: "
                         + json.dumps(
                             {
                                 "type": "success",
                                 "title": title,
-                                "page_id": result.get("page_id"),
+                                "assignment_id": assignment_id,
                                 "url": result.get("url"),
                                 "current": success_count,
                                 "total": len(html_files),
-                                "item_type": "page",
+                                "item_type": "homework",
+                            }
+                        )
+                        + "\n\n"
+                    )
+                else:
+                    yield (
+                        "data: "
+                        + json.dumps(
+                            {
+                                "type": "error",
+                                "title": title,
+                                "error": result.get("error", "Unknown error"),
+                                "current": success_count,
+                                "total": len(html_files),
+                                "item_type": "homework",
                             }
                         )
                         + "\n\n"
@@ -303,7 +282,76 @@ async def upload_to_canvas(
                             "error": str(e),
                             "current": success_count,
                             "total": len(html_files),
-                            "item_type": "unknown",
+                            "item_type": "homework",
+                        }
+                    )
+                    + "\n\n"
+                )
+        
+        # STEP 2: Regenerate weekly pages with homework URLs and upload them
+        try:
+            # Get the original weeks data to regenerate pages with homework links
+            temp_dir = os.path.join("temp", file_group_identifier)
+            
+            # We need to reconstruct the weeks data from the generated files
+            # For now, we'll regenerate the weekly pages with the homework URLs
+            from files.backend.build_htmls.build_weekly_page import regenerate_weekly_pages_with_homework_urls
+            
+            updated_weekly_files = regenerate_weekly_pages_with_homework_urls(
+                temp_dir, homework_urls, course_id
+            )
+            
+        except Exception as e:
+            # If regeneration fails, proceed with original weekly files
+            print(f"Warning: Could not regenerate weekly pages with homework URLs: {e}")
+            updated_weekly_files = weekly_files
+        
+        # STEP 3: Upload the weekly pages
+        for filepath in updated_weekly_files:
+            try:
+                filename = os.path.basename(filepath)
+                title = (
+                    os.path.splitext(filename)[0]
+                    .replace(file_group_identifier, "")
+                    .replace("_", " ")
+                    .title()
+                    .strip()
+                )
+
+                with open(filepath, "r", encoding="utf-8") as f:
+                    html_content = f.read()
+
+                # Handle weekly page upload
+                result = upload_page(title, html_content, course_id, access_token)
+                success_count += 1
+
+                yield (
+                    "data: "
+                    + json.dumps(
+                        {
+                            "type": "success",
+                            "title": title,
+                            "page_id": result.get("page_id"),
+                            "url": result.get("url"),
+                            "current": success_count,
+                            "total": len(html_files),
+                            "item_type": "page",
+                        }
+                    )
+                    + "\n\n"
+                )
+
+            except Exception as e:
+                yield (
+                    "data: "
+                    + json.dumps(
+                        {
+                            "type": "error",
+                            "title": title,
+                            "error": str(e),
+                            "current": success_count,
+                            "total": len(html_files),
+                            "item_type": "page",
                         }
                     )
                     + "\n\n"

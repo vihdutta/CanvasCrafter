@@ -2,6 +2,18 @@ from datetime import datetime
 import pandas as pd
 import yaml
 import numpy as np
+import re
+
+
+def title_to_url_safe(title: str) -> str:
+    if not title or pd.isna(title) or str(title).strip() == "":
+        return ""
+    url_safe = str(title).lower()
+    url_safe = re.sub(r'[^a-z0-9]+', '-', url_safe)
+    url_safe = re.sub(r'-+', '-', url_safe)
+    url_safe = url_safe.strip('-')
+    
+    return url_safe
 
 
 # populates the Week objects from the yaml and excel schedule files
@@ -47,10 +59,27 @@ def populate_weeks(
             if weekday not in weeks[weeks_column[index]]:
                 weeks[weeks_column[index]][weekday] = {}
 
+            weeks[weeks_column[index]][weekday]["lesson"] = row[3]
             weeks[weeks_column[index]][weekday]["date"] = formatted_date
             weeks[weeks_column[index]][weekday]["referenced"] = row[7]
             weeks[weeks_column[index]][weekday]["assigned"] = row[9]
             weeks[weeks_column[index]][weekday]["due"] = row[10]
+            
+            prework_title_raw = str(row[11]).strip() if not pd.isna(row[11]) else ""
+            if prework_title_raw and prework_title_raw != "":
+                current_module = weeks[weeks_column[index]]["module"]
+                prework_title_with_prefix = f"Prework Module {current_module} - {prework_title_raw}"
+                weeks[weeks_column[index]][weekday]["prework_video_title"] = prework_title_with_prefix
+                url_safe_title = title_to_url_safe(prework_title_with_prefix)
+                if url_safe_title:
+                    prework_link = f"https://umich.instructure.com/courses/801002/pages/{url_safe_title}"
+                    weeks[weeks_column[index]][weekday]["prework_video_link"] = prework_link
+                else:
+                    weeks[weeks_column[index]][weekday]["prework_video_link"] = ""
+            else:
+                weeks[weeks_column[index]][weekday]["prework_video_title"] = row[11]
+                weeks[weeks_column[index]][weekday]["prework_video_link"] = ""
+
         else:
             print(f"Warning: Row {index} has non-datetime value in date field: {row[4]}")
 

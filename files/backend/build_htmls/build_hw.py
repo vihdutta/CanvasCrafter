@@ -7,7 +7,9 @@ from jinja2 import Environment, FileSystemLoader
 from files.backend.populate_weeks import populate_weeks
 
 
-def build_homework_html(weeks_data: Dict, unique_identifier: str = "hw") -> List[str]:
+def build_homework_html(
+    weeks_data: Dict, unique_identifier: str = "hw", course_id: str | None = None
+) -> List[str]:
     template_dir = os.path.join(
         os.path.dirname(__file__), "..", "..", "..", "templates"
     )
@@ -42,7 +44,6 @@ def build_homework_html(weeks_data: Dict, unique_identifier: str = "hw") -> List
             if day in week_data:
                 day_data = week_data[day]
 
-                # Check for homework assignments (assigned)
                 if (
                     "assigned" in day_data
                     and day_data["assigned"]
@@ -50,7 +51,6 @@ def build_homework_html(weeks_data: Dict, unique_identifier: str = "hw") -> List
                 ):
                     hw_number = extract_homework_number(day_data["assigned"])
                     if hw_number:
-                        # Look for corresponding due date
                         due_date = find_homework_due_date(weeks_data, hw_number)
 
                         homework_assignments.append(
@@ -77,6 +77,7 @@ def build_homework_html(weeks_data: Dict, unique_identifier: str = "hw") -> List
                 module_number=hw["module"],
                 learning_objectives=hw["learning_objectives"],
                 learning_objectives_topic=hw["learning_objectives_topic"],
+                course_id=course_id,
             )
 
             # Write HTML file

@@ -18,7 +18,10 @@ def upload_page(
 
     headers = {"Authorization": f"Bearer {access_token}"}
 
-    slug = re.sub(r"\W+", "_", title.lower()).strip("_")
+    # Canvas converts any non-alphanumeric characters in the provided page_url to hyphens.
+    # Do that conversion ourselves so the slug we send *exactly* matches the one Canvas stores
+    # (e.g. "Week 1" becomes "week-1"), preventing Canvas from appending a numeric suffix.
+    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
     data = {
         "wiki_page[title]": title,
         "wiki_page[body]": html_content,
