@@ -16,6 +16,33 @@ def title_to_url_safe(title: str) -> str:
     return url_safe
 
 
+def process_quiz_from_topic(topic: str) -> dict:
+    quiz_info = {
+        "has_quiz": False,
+        "quiz_number": "",
+        "study_text": "",
+        "sample_text": ""
+    }
+    
+    if not topic or pd.isna(topic):
+        return quiz_info
+    
+    topic_str = str(topic).strip()
+    
+    # Look for "Quiz" followed by optional space and a number
+    quiz_pattern = r'Quiz\s*(\d+)'
+    match = re.search(quiz_pattern, topic_str, re.IGNORECASE)
+    
+    if match:
+        quiz_number = match.group(1)
+        quiz_info["has_quiz"] = True
+        quiz_info["quiz_number"] = quiz_number
+        quiz_info["study_text"] = f"Study for Quiz {quiz_number}"
+        quiz_info["sample_text"] = f"Sample Quiz {quiz_number}"
+    
+    return quiz_info
+
+
 # populates the Week objects from the yaml and excel schedule files
 def populate_weeks(
     excel_schedule_path: str,
@@ -61,9 +88,14 @@ def populate_weeks(
 
             weeks[weeks_column[index]][weekday]["lesson"] = row[3]
             weeks[weeks_column[index]][weekday]["date"] = formatted_date
+            weeks[weeks_column[index]][weekday]["topic"] = row[6]
             weeks[weeks_column[index]][weekday]["referenced"] = row[7]
             weeks[weeks_column[index]][weekday]["assigned"] = row[9]
             weeks[weeks_column[index]][weekday]["due"] = row[10]
+            
+            # Process quiz information from topic
+            quiz_info = process_quiz_from_topic(row[6])
+            weeks[weeks_column[index]][weekday]["quiz_info"] = quiz_info
             
             prework_title_raw = str(row[11]).strip() if not pd.isna(row[11]) else ""
             if prework_title_raw and prework_title_raw != "":

@@ -196,6 +196,10 @@
                     <h3>Before Class</h3>
                     <h4>Prework</h4>
                     <ul>
+                        {% if "monday" in week and week.monday.quiz_info and week.monday.quiz_info.has_quiz %}
+                            <li>{{ week.monday.quiz_info.study_text }}</li>
+                            <li>{{ week.monday.quiz_info.sample_text }}</li>
+                        {% endif %}
                         {% if "monday" in week and week.monday.prework_video_title and week.monday.prework_video_title.strip() %}
                             {% set title_parts = week.monday.prework_video_title.split(' - ', 1) %}
                             {% set display_title = 'Prework ' + week.monday.lesson + ' - ' + title_parts[1] %}
@@ -230,6 +234,10 @@
                     <h3>Before Class</h3>
                     <h4>Prework</h4>
                     <ul>
+                        {% if "wednesday" in week and week.wednesday.quiz_info and week.wednesday.quiz_info.has_quiz %}
+                            <li>{{ week.wednesday.quiz_info.study_text }}</li>
+                            <li>{{ week.wednesday.quiz_info.sample_text }}</li>
+                        {% endif %}
                         {% if "wednesday" in week and week.wednesday.prework_video_title and week.wednesday.prework_video_title.strip() %}
                             {% set title_parts = week.wednesday.prework_video_title.split(' - ', 1) %}
                             {% set display_title = 'Prework ' + week.wednesday.lesson + ' - ' + title_parts[1] %}
@@ -264,6 +272,10 @@
                     <h3>Before Class</h3>
                     <h4>Prework</h4>
                     <ul>
+                        {% if "friday" in week and week.friday.quiz_info and week.friday.quiz_info.has_quiz %}
+                            <li>{{ week.friday.quiz_info.study_text }}</li>
+                            <li>{{ week.friday.quiz_info.sample_text }}</li>
+                        {% endif %}
                         {% if "friday" in week and week.friday.prework_video_title and week.friday.prework_video_title.strip() %}
                             {% set title_parts = week.friday.prework_video_title.split(' - ', 1) %}
                             {% set display_title = 'Prework ' + week.friday.lesson + ' - ' + title_parts[1] %}

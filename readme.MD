@@ -11,3 +11,10 @@ Build your Canvas course pages at the speed of thought. ⚡🧠
 ## ⚙️ Tech Stack
 * **Frontend:** Tailwind
 * **Backend:** FastAPI, Python
+
+## Files Copied Over
+* Quiz 1 Sample - Particle Kinematics 
+* Quiz 2 Sample - Particle Kinetics 
+* Quiz 3 Sample - Particle Vibrations 	
+* Quiz 4 Sample - Rigid Body Kinematics 
+* Quiz 5 Sample - Rigid Body Kinetics 
