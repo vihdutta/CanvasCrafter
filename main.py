@@ -21,6 +21,7 @@ from files.backend.populate_weeks import populate_weeks
 from files.backend.upload_to_canvas import upload_page
 from files.backend.zip_built_htmls import zip_stream
 from files.backend.build_htmls.build_hw import upload_homework_assignment
+from files.backend.build_htmls.build_quiz import upload_quiz_assignment
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -42,6 +43,8 @@ async def api():
         "files/yaml/overview_statements.yaml",
         "files/yaml/learning_objectives.yaml",
         "files/yaml/images.yaml",
+        course_id=None,  # Canvas credentials not available in this endpoint
+        access_token=None
     )
     return {"message": weekly_page_data}
 
@@ -118,6 +121,7 @@ async def generate(path: str):
         # Separate weekly pages from homework files
         weekly_files = []
         homework_files = []
+        quiz_files = []
 
         for html_file in html_files:
             filename = os.path.basename(html_file)
@@ -133,6 +137,20 @@ async def generate(path: str):
                         "html": html_content,
                         "type": "homework",
                         "hw_number": hw_number,
+                    }
+                )
+            elif filename.startswith("quiz_"):
+                # quiz file
+                quiz_number = filename.split("_")[1]
+                with open(html_file, "r", encoding="utf-8") as f:
+                    html_content = f.read()
+
+                quiz_files.append(
+                    {
+                        "name": f"Quiz {quiz_number}",
+                        "html": html_content,
+                        "type": "quiz",
+                        "quiz_number": quiz_number,
                     }
                 )
             elif filename.startswith("week_"):
@@ -167,8 +185,17 @@ async def generate(path: str):
 
         homework_files = sorted(homework_files, key=get_hw_number)
 
-        # Combine weekly and homework files
-        all_files = weekly_files + homework_files
+        # Sort quiz files numerically by quiz number
+        def get_quiz_number(item):
+            try:
+                return int(item.get("quiz_number", "0"))
+            except (ValueError, AttributeError):
+                return float("inf")
+
+        quiz_files = sorted(quiz_files, key=get_quiz_number)
+
+        # Combine weekly, homework, and quiz files
+        all_files = weekly_files + homework_files + quiz_files
 
         return all_files
 
@@ -209,10 +236,12 @@ async def upload_to_canvas(
 
         success_count = 0
         homework_urls = {}  # Dictionary to store homework assignment URLs
+        quiz_urls = {}  # Dictionary to store quiz assignment URLs
         
-        # Separate homework and weekly files
+        # Separate homework, quiz, and weekly files
         homework_files = [f for f in html_files if os.path.basename(f).startswith("homework_")]
-        weekly_files = [f for f in html_files if not os.path.basename(f).startswith("homework_")]
+        quiz_files = [f for f in html_files if os.path.basename(f).startswith("quiz_")]
+        weekly_files = [f for f in html_files if not os.path.basename(f).startswith("homework_") and not os.path.basename(f).startswith("quiz_")]
         
         # STEP 1: Upload homework assignments FIRST
         for filepath in homework_files:
@@ -288,25 +317,99 @@ async def upload_to_canvas(
                     + "\n\n"
                 )
         
-        # STEP 2: Regenerate weekly pages with homework URLs and upload them
+        # STEP 2: Upload quiz assignments SECOND
+        for filepath in quiz_files:
+            try:
+                filename = os.path.basename(filepath)
+                quiz_number = filename.split("_")[1]
+                title = f"Quiz {quiz_number}"
+
+                with open(filepath, "r", encoding="utf-8") as f:
+                    html_content = f.read()
+
+                # Try to extract quiz date from HTML content if available
+                quiz_date = None
+                import re
+                date_match = re.search(r"(\d{1,2}/\d{1,2}/\d{4})", html_content)
+                if date_match:
+                    quiz_date = date_match.group(1)
+
+                result = upload_quiz_assignment(
+                    title, html_content, course_id, access_token, quiz_date
+                )
+
+                if result.get("success"):
+                    success_count += 1
+                    assignment_id = result.get("assignment_id")
+                    # Store the quiz URL for linking in weekly pages
+                    quiz_urls[title] = f"https://umich.instructure.com/courses/{course_id}/assignments/{assignment_id}"
+                    
+                    yield (
+                        "data: "
+                        + json.dumps(
+                            {
+                                "type": "success",
+                                "title": title,
+                                "assignment_id": assignment_id,
+                                "url": result.get("url"),
+                                "current": success_count,
+                                "total": len(html_files),
+                                "item_type": "quiz",
+                            }
+                        )
+                        + "\n\n"
+                    )
+                else:
+                    yield (
+                        "data: "
+                        + json.dumps(
+                            {
+                                "type": "error",
+                                "title": title,
+                                "error": result.get("error", "Unknown error"),
+                                "current": success_count,
+                                "total": len(html_files),
+                                "item_type": "quiz",
+                            }
+                        )
+                        + "\n\n"
+                    )
+
+            except Exception as e:
+                yield (
+                    "data: "
+                    + json.dumps(
+                        {
+                            "type": "error",
+                            "title": title,
+                            "error": str(e),
+                            "current": success_count,
+                            "total": len(html_files),
+                            "item_type": "quiz",
+                        }
+                    )
+                    + "\n\n"
+                )
+        
+        # STEP 3: Regenerate weekly pages with homework URLs and quiz URLs and upload them
         try:
-            # Get the original weeks data to regenerate pages with homework links
+            # Get the original weeks data to regenerate pages with homework and quiz links
             temp_dir = os.path.join("temp", file_group_identifier)
             
             # We need to reconstruct the weeks data from the generated files
-            # For now, we'll regenerate the weekly pages with the homework URLs
+            # For now, we'll regenerate the weekly pages with the homework URLs and quiz URLs
             from files.backend.build_htmls.build_weekly_page import regenerate_weekly_pages_with_homework_urls
             
             updated_weekly_files = regenerate_weekly_pages_with_homework_urls(
-                temp_dir, homework_urls, course_id
+                temp_dir, homework_urls, course_id, quiz_urls
             )
             
         except Exception as e:
             # If regeneration fails, proceed with original weekly files
-            print(f"Warning: Could not regenerate weekly pages with homework URLs: {e}")
+            print(f"Warning: Could not regenerate weekly pages with homework and quiz URLs: {e}")
             updated_weekly_files = weekly_files
         
-        # STEP 3: Upload the weekly pages
+        # STEP 4: Upload the weekly pages
         for filepath in updated_weekly_files:
             try:
                 filename = os.path.basename(filepath)

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>version 3 test sandbox v2</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+        }
+        .grid-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-left: -15px;
+            margin-right: -15px;
+        }
+        .col-sm-12, .col-md-12, .col-lg-4, .col-lg-6, .col-md-7, .col-md-5, .col-xs-12 {
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
+            width: 100%; /* Default for smaller screens */
+        }
+
+        /* Basic responsive column sizing (simplified) */
+        @media (min-width: 992px) { /* Corresponds to 'lg' breakpoint */
+            .col-lg-4 {
+                width: 33.3333%;
+            }
+            .col-lg-6 {
+                width: 50%;
+            }
+        }
+        @media (min-width: 768px) { /* Corresponds to 'md' breakpoint */
+            .col-md-5 {
+                width: 41.6667%;
+            }
+            .col-md-6 {
+                 width: 50%;
+            }
+            .col-md-7 {
+                width: 58.3333%;
+            }
+        }
+        /* General styling */
+        .content-box {
+            padding: 10px;
+        }
+        .styleguide-section__grid-demo-element {
+            margin-bottom: 15px;
+        }
+        h2, h3 {
+            color: #000000;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #ccc;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<section>
+<div style="background-color: #d5e0ec; padding-left: 15px;">
+    <h2 style="text-align: center;"><span style="color: #000000;">Overview - Week 1</span></h2>
+</div>
+<p>Welcome to Winter 2025 ME 240! This week, we will start by familiarizing ourselves with the syllabus, including the course structure and expectations. We will start Module 1, which introduces the principles of Particle Kinematics. Please complete the Student Survey from FCI by 1/15/2025 for the chance to earn extra credit on the overall assignments score in the course.
+</p>
+</section>
+
+<section>
+    <div class="content-box">
+        <div class="grid-row">
+            <div class="col-sm-12 col-lg-6">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #fcf7d2;">
+                        <div style="background-color: #d5e0ec; padding-left: 15px;">
+                            <h3 style="text-align: center;"><img id="36156766" role="presentation" src="https://umich.instructure.com/courses/801002/files/41036074/preview" alt="Schedule Icon" width="47" height="32" data-api-endpoint="https://umich.instructure.com/api/v1/courses/801002/files/41036074" data-api-returntype="File" /><span style="color: #000000;"> Schedule Info</span></h3>
+                        </div>
+                        <p style="text-align: center;"><span style="color: #000000;">Last Week:</span> N/A</p>
+                        <p style="text-align: center;"><span style="color: #000000;">Next Week:</span> N/A</p>
+                        <p style="text-align: center;"><a href="https://umich.instructure.com/courses/799907/modules" target="_blank">See the Full Course Schedule</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-lg-6">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #fcf7d2;">
+                        <div style="background-color: #d5e0ec; padding-left: 15px;">
+                            <h3 style="text-align: center;"><span style="color: #000000;"><img id="36156797" role="presentation" src="https://umich.instructure.com/courses/801002/files/41036064/preview" alt="Upcoming Work Icon" width="24" height="26" data-api-endpoint="https://umich.instructure.com/api/v1/courses/801002/files/41036064" data-api-returntype="File" /> UPCOMING WORK</span></h3>
+                        </div>
+                        <ul>
+                            <!-- UPCOMING WORK -->
+                            <!-- Note: "OPENS" means "assigned" -->
+
+                            <!-- DUE HW -->
+                            
+                            
+                            
+
+                            <!-- ASSIGNED HW -->
+                            
+                            
+                            
+
+                            <!-- UPCOMING QUIZ -->
+                            
+                                
+                                    <li>Quiz 1: 09/17/2025</li>
+                                
+                            
+                        </ul>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div style="background-color: #d5e0ec; padding-left: 15px;">
+    <h2 style="text-align: center;"><span style="color: #000000;">Module 1 Learning Objectives: Particle Kinetics</span></h2>
+</div>
+<div class="content-box">
+    <div class="grid-row">
+        <div class="col-md-7 col-sm-12 col-xs-12">
+            <ul>
+                
+                    <li>LO1: Understand the relationship between position, velocity, and acceleration</li>
+                
+                    <li>LO2: Select appropriate coordinate systems and be able to decompose them correctly (cartesian, polar/cylindrical, normal-tangential)</li>
+                
+                    <li>LO3: Execute coordinate transformations</li>
+                
+                    <li>LO4: Define kinematic variables using vector notation</li>
+                
+                    <li>LO5: Solve systems of linear equations</li>
+                
+                    <li>LO6: Analyze kinematic equations that require implementation of calculus</li>
+                
+            </ul>
+        </div>
+        <div class="col-md-5 col-sm-12 col-xs-12">
+            <figure style="text-align: center; border: 1px solid black; padding: 10px;">
+                <img src="https://umich.instructure.com/courses/799907/files/41036081/preview" style="max-width: 100%; height: auto;" alt="Module diagram">
+                <figcaption>Diagram of a particle moving in straight-line, rectilinear motion</figcaption>
+            </figure>
+        </div>
+    </div>
+</div>
+
+<section>
+    <div style="background-color: #d5e0ec; padding-left: 15px;">
+        <h2 style="text-align: center;"><span style="color: #000000;">Week 1 Activities</span></h2>
+    </div>
+    <div class="content-box">
+        <div class="grid-row">
+            <div class="col-sm-12 col-md-12 col-lg-4">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #c3ddd6; padding-left: 15px; padding-bottom: 15px;">
+                        <h2 style="text-align: center;"><span style="color: #000000;">Monday</span></h2>
+                        
+                            <h2 style="text-align: center;"><span style="color: #000000;">08/25/2025</span></h2>
+                        
+                    </div>
+                    <h3>Before Class</h3>
+                    <h4>Prework</h4>
+                    <ul>
+                        
+                        
+                            
+                            
+                            <li>Video: <a href="https://umich.instructure.com/courses/801002/pages/prework-module-1-welcome-to-our-canvas-page-6-15-minutes" target="_blank">Prework 1A - Welcome to Our Canvas Page (6:15 minutes)</a></li>
+                        
+                        <li>Be ready to ask questions and talk with your classmates about the prework content!</li>
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        
+                            <li> Textbook: 2/1, 2/2 </li>
+                        
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <ul>
+                        <li>Class Notes: TO BE POSTED</li>
+                        <li>Class Recording: TO BE POSTED</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-4">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #f6cac9; padding-left: 15px; padding-bottom: 15px;">
+                        <h2 style="text-align: center;"><span style="color: #000000;">Wednesday</span></h2>
+                        
+                            <h2 style="text-align: center;"><span style="color: #000000;">08/27/2025</span></h2>
+                        
+                    </div>
+                    <h3>Before Class</h3>
+                    <h4>Prework</h4>
+                    <ul>
+                        
+                        
+                            
+                            
+                            <li>Video: <a href="https://umich.instructure.com/courses/801002/pages/prework-module-1-rectilinear-motion-10-26-minutes" target="_blank">Prework 1B - Rectilinear Motion (10:26 minutes)</a></li>
+                        
+                        <li>Be ready to ask questions and talk with your classmates about the prework content!</li>
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        
+                            <li> Textbook: 2/3, 2/4 </li>
+                        
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <ul>
+                        <li>Class Notes: TO BE POSTED</li>
+                        <li>Class Recording: TO BE POSTED</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-4">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #d1c3d5; padding-left: 15px; padding-bottom: 15px;">
+                        <h2 style="text-align: center;"><span style="color: #000000;">Friday</span></h2>
+                        
+                            <h2 style="text-align: center;"><span style="color: #000000;">08/29/2025</span></h2>
+                        
+                    </div>
+                    <h3>Before Class</h3>
+                    <h4>Prework</h4>
+                    <ul>
+                        
+                        
+                            
+                            
+                            <li>Video: <a href="https://umich.instructure.com/courses/801002/pages/prework-module-1-normal-tangential-coordinates-23-42-minutes" target="_blank">Prework 1C - Normal Tangential Coordinates (23:42 minutes)</a></li>
+                        
+                        <li>Be ready to ask questions and talk with your classmates about the prework content!</li>
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        
+                            <li> Textbook: 2/5 </li>
+                        
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <ul>
+                        <li>Class Notes: TO BE POSTED</li>
+                        <li>Class Recording: TO BE POSTED</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <h2 style="text-align: center; background-color: #d5e0ec;"><span style="color: #000000;">Course Information</span></h2>
+    <div class="content-box">
+        <div class="grid-row">
+            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #000000; font-family: inherit; font-size: 1rem;">Lecture time and location:</span></div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #000000;">Monday, Wednesday, &amp; Friday 11:30 AM - 1:00 PM</span></div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #000000;">3460 Central Campus Classroom Building (CCCB)</span></div>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                <div class="styleguide-section__grid-demo-element">
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #2c333e; font-family: inherit; font-size: 1rem;">Full Schedule Calendar (PDF) / <a href="https://umich.instructure.com/courses/799907/modules" target="_blank" rel="noopener" style="color: #2c333e;">Canvas Modules</a></span></div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span class="textLayer--absolute" style="font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Course Syllabus (PDF)</span></div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #2c333e;"><span class="textLayer--absolute" style="font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Instructors and Office Hours</span></span></div>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<div style="background-color: #d5e0ec; padding-left: 15px;">
+    <h2><span style="color: #000000;">Purpose</span></h2>
+</div>
+<p><span>This quiz is designed to assess your understanding of {{ learning_objectives_topic }}</span></p>
+<p><span style="font-family: inherit; font-size: 1.5em; color: var(--ic-brand-font-color-dark);">Module {{ module_number }} Learning Objectives: {{ learning_objectives_topic }}</span></p>
+<div class="content-box">
+    <div class="grid-row">
+        <div class="col-md-12 col-lg-8">
+            <div class="styleguide-section__grid-demo-element">
+                <ul>
+                    {% for objective in learning_objectives %}
+                    <li>{{ objective }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="background-color: #d5e0ec; padding-left: 15px;">
+    <h2><span style="color: #000000;">Quiz Details</span></h2>
+</div>
+<p><span><strong>Quiz Date:</strong> {{ quiz_date }}</span></p>
+<p><span><strong>Quiz Topic:</strong> {{ quiz_topic }}</span></p>
+<p><span><strong>Time Limit:</strong> 50 minutes</span></p>
+<p><span><strong>Attempts:</strong> 1</span></p>
+<div style="background-color: #d5e0ec; padding-left: 15px;">
+    <h2><span style="color: #000000;">Study Materials</span></h2>
+</div>
+<p><span>To prepare for this quiz, review the following materials:</span></p>
+<ul>
+    <li><span>All lecture notes and recordings from the current module</span></li>
+    <li><span>Assigned textbook readings</span></li>
+    <li><span>Prework videos and activities</span></li>
+    <li><span>Homework assignments related to this module</span></li>
+    {% if sample_quiz_url %}
+    <li><span><a href="{{ sample_quiz_url }}" target="_blank">Sample Quiz {{ quiz_number }}</a></span></li>
+    {% endif %}
+</ul>
+<div style="background-color: #d5e0ec; padding-left: 15px;">
+    <h2><span style="color: #000000;">Instructions</span></h2>
+</div>
+<p><span>Please read the following instructions carefully:</span></p>
+<ul>
+    <li><span>You will have 50 minutes to complete the quiz</span></li>
+    <li><span>The quiz will be available starting at the beginning of class</span></li>
+    <li><span>Once you start the quiz, you must complete it in one sitting</span></li>
+    <li><span>Make sure you have a stable internet connection</span></li>
+    <li><span>Calculator use is permitted where appropriate</span></li>
+    <li><span>No collaboration is allowed during the quiz</span></li>
+</ul>
+<div style="background-color: #d5e0ec; padding-left: 15px;">
+    <h2><span style="color: #000000;">Support and Resources</span></h2>
+</div>
+<p><span>If you have any questions before the quiz, please visit the instructional team during our scheduled <a title="Instructors and Drop-In Hours" href="https://umich.instructure.com/courses/{{ course_id }}/pages/instructors-and-drop-in-hours-2" data-course-type="wikiPages" data-published="true" data-api-endpoint="https://umich.instructure.com/api/v1/courses/{{ course_id }}/pages/instructors-and-drop-in-hours-2" data-api-returntype="Page">drop-in hours</a>.</span></p>
+<p><span>If you experience technical difficulties during the quiz, please contact the instructional team immediately.</span></p>
+<p>&nbsp;</p>

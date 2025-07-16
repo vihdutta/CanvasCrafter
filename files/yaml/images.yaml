@@ -1,63 +1,63 @@
 1:
-  image_path: "images/week_1.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036081/preview"
   caption: "Diagram of a particle moving in straight-line, rectilinear motion"
 
 2:
-  image_path: "images/week_2.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036047/preview"
   caption: "Diagram of a particle moving through space denoted using Normal-Tangential coordinates"
 
 3:
-  image_path: "images/week_3.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036092/preview"
   caption: "Free body diagram of a particle on a slope"
 
 4:
-  image_path: "images/week_4.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036107/preview"
   caption: "Example particle kinetics problem that we will be simulating in MATLAB"
 
 5:
-  image_path: "images/week_5.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036109/preview"
   caption: "We will be using work energy methods to solve two-state kinetics problems like the bead on a wire shown above"
 
 6:
-  image_path: "images/week_6.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036128/preview"
   caption: "Particle impacts are a great application of impulse-momentum which we will study this week."
 
 7:
-  image_path: "images/week_7.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036052/preview"
   caption: "The mass-spring-damper model that we will be using to derive damped vibrational responses from"
 
 8:
-  image_path: "images/week_8.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036028/preview"
   caption: "Diagram of a rigid body translating and rotating in planar motion"
 
 9:
-  image_path: "images/week_9.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036028/preview"
   caption: "Diagram of a rigid body translating and rotating in planar motion"
 
 10:
-  image_path: "images/week_10.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036027/preview"
   caption: "Roll without slip is a great application of the concept of the instantaneous center of zero velocity"
 
 11:
-  image_path: "images/week_11.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036173/preview"
   caption: "Diagram of a two rigid bodies moving in space"
 
 12:
-  image_path: "images/week_12.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036164/preview"
   caption: "Diagram of a rigid body with forces and coupled moments acting on it"
 
 13:
-  image_path: "images/week_13.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036164/preview"
   caption: "Diagram of a rigid body with forces acting on it"
 
 14:
-  image_path: "images/week_14.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036194/preview"
   caption: "Diagram of an example work-energy problem we will work through in this week's prework"
 
 15:
-  image_path: "images/week_15.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036212/preview"
   caption: "Rigid body vibrations example problem"
 
 16:
-  image_path: "images/week_16.png"
+  image_path: "https://umich.instructure.com/courses/799907/files/41036068/preview"
   caption: "Diagram of a rigid body on a spring with forces acting on it"

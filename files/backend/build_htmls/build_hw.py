@@ -213,6 +213,8 @@ if __name__ == "__main__":
         overview_path=overview_path,
         objectives_path=objectives_path,
         images_path=images_path,
+        course_id=None,  # Canvas credentials not available in direct script run
+        access_token=None
     )
 
     homework_files = build_homework_html(weekly_page_data)

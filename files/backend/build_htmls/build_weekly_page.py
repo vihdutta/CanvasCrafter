@@ -6,10 +6,14 @@ from typing import List
 from jinja2 import Environment, FileSystemLoader
 from files.backend.populate_weeks import populate_weeks
 from files.backend.build_htmls.build_hw import build_homework_html
+from files.backend.build_htmls.build_quiz import build_quiz_html
+
+# Import quiz utility functions
+from files.backend.populate_weeks_utils import find_next_quiz
 
 
 # builds all html files and returns list containing the built files' names
-def build_html(weeks_data, unique_identifier="page", course_id=None, homework_urls=None):
+def build_html(weeks_data, unique_identifier="page", course_id=None, homework_urls=None, quiz_urls=None):
     template_dir = os.path.join(
         os.path.dirname(__file__), "..", "..", "..", "templates"
     )
@@ -57,6 +61,9 @@ def build_html(weeks_data, unique_identifier="page", course_id=None, homework_ur
         else:
             next_week_text = "N/A"
 
+        # Find next upcoming quiz for this week
+        next_quiz = find_next_quiz(weeks_data, int(key))
+
         html = template.render(
             week=curr_week,
             week_number=display_week_num,
@@ -64,6 +71,8 @@ def build_html(weeks_data, unique_identifier="page", course_id=None, homework_ur
             next_week_text=next_week_text,
             course_id=course_id,
             homework_urls=homework_urls or {},
+            quiz_urls=quiz_urls or {},  # Add quiz URLs
+            next_quiz=next_quiz,  # Add quiz information
         )
 
         # write each HTML file to the unique output subdirectory
@@ -74,10 +83,11 @@ def build_html(weeks_data, unique_identifier="page", course_id=None, homework_ur
 
     print(f"Rendered HTML files for all weeks in: {output_dir}")
 
-def regenerate_weekly_pages_with_homework_urls(temp_dir, homework_urls, course_id):
+
+def regenerate_weekly_pages_with_homework_urls(temp_dir, homework_urls, course_id, quiz_urls=None):
     """
-    Regenerate weekly pages with homework URLs for proper linking.
-    This function is called after homework assignments are uploaded to Canvas.
+    Regenerate weekly pages with homework URLs and quiz URLs for proper linking.
+    This function is called after homework assignments and quizzes are uploaded to Canvas.
     """
     
     # Look for a saved weeks_data file or reconstruct from existing files
@@ -110,23 +120,23 @@ def regenerate_weekly_pages_with_homework_urls(temp_dir, homework_urls, course_i
     # Extract unique identifier from temp_dir path
     unique_identifier = os.path.basename(temp_dir)
     
-    # Regenerate weekly pages with homework URLs
-    build_html(weeks_data, unique_identifier, course_id, homework_urls)
+    # Regenerate weekly pages with homework URLs and quiz URLs
+    build_html(weeks_data, unique_identifier, course_id, homework_urls, quiz_urls)
     
     # Return list of regenerated weekly files
     return glob.glob(os.path.join(temp_dir, "week_*.html"))
 
 
-# builds the html files from the upload, returns the file_name that was created.
+# builds the html files from the upload, 
 def build_from_upload(
-    file, uuid, UPLOAD_DIR, contents, course_id=None, access_token=None
+    file, uuid_module, upload_dir: str, contents: bytes, course_id: str = None, access_token: str = None
 ) -> str:
     ext = os.path.splitext(file.filename)[1].lower()
-    unique_identifier = uuid.uuid4().hex
+    unique_identifier = uuid_module.uuid4().hex
     unique_filename = f"{unique_identifier}{ext}"
-    dest_path = os.path.join(UPLOAD_DIR, unique_filename)
+    dest_path = os.path.join(upload_dir, unique_filename)
 
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    os.makedirs(upload_dir, exist_ok=True)
     with open(dest_path, "wb") as out:
         out.write(contents)
 
@@ -140,6 +150,8 @@ def build_from_upload(
         overview_path=overview_path,
         objectives_path=objectives_path,
         images_path=images_path,
+        course_id=course_id,
+        access_token=access_token,
     )
 
     # Save the weeks data for later use in regeneration
@@ -151,6 +163,7 @@ def build_from_upload(
     
     build_html(weekly_page_data, unique_identifier, course_id)
     build_homework_html(weekly_page_data, unique_identifier, course_id)
+    build_quiz_html(weekly_page_data, unique_identifier, course_id)  # Add quiz building
 
     os.remove(excel_schedule_path)
 
@@ -168,6 +181,8 @@ if __name__ == "__main__":
         overview_path=overview_path,
         objectives_path=objectives_path,
         images_path=images_path,
+        course_id=None,  # Canvas credentials not available in direct script run
+        access_token=None
     )
 
     build_html(weekly_page_data, course_id=123456)

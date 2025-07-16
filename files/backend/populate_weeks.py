@@ -2,45 +2,14 @@ from datetime import datetime
 import pandas as pd
 import yaml
 import numpy as np
-import re
+from typing import Optional, Dict
 
-
-def title_to_url_safe(title: str) -> str:
-    if not title or pd.isna(title) or str(title).strip() == "":
-        return ""
-    url_safe = str(title).lower()
-    url_safe = re.sub(r'[^a-z0-9]+', '-', url_safe)
-    url_safe = re.sub(r'-+', '-', url_safe)
-    url_safe = url_safe.strip('-')
-    
-    return url_safe
-
-
-def process_quiz_from_topic(topic: str) -> dict:
-    quiz_info = {
-        "has_quiz": False,
-        "quiz_number": "",
-        "study_text": "",
-        "sample_text": ""
-    }
-    
-    if not topic or pd.isna(topic):
-        return quiz_info
-    
-    topic_str = str(topic).strip()
-    
-    # Look for "Quiz" followed by optional space and a number
-    quiz_pattern = r'Quiz\s*(\d+)'
-    match = re.search(quiz_pattern, topic_str, re.IGNORECASE)
-    
-    if match:
-        quiz_number = match.group(1)
-        quiz_info["has_quiz"] = True
-        quiz_info["quiz_number"] = quiz_number
-        quiz_info["study_text"] = f"Study for Quiz {quiz_number}"
-        quiz_info["sample_text"] = f"Sample Quiz {quiz_number}"
-    
-    return quiz_info
+# Import utility functions from the new utils module
+from files.backend.populate_weeks_utils import (
+    title_to_url_safe,
+    fetch_canvas_pages,
+    process_quiz_from_topic
+)
 
 
 # populates the Week objects from the yaml and excel schedule files
@@ -48,7 +17,9 @@ def populate_weeks(
     excel_schedule_path: str,
     overview_path: str,
     objectives_path: str,
-    images_path: str
+    images_path: str,
+    course_id: str = None,
+    access_token: str = None
 ):
     DATA_START_ROW = 1
     df = pd.read_excel(excel_schedule_path, engine="openpyxl")
@@ -56,6 +27,12 @@ def populate_weeks(
     df = df.replace(np.nan, "")
 
     overview_data, objective_data, images_data = read_overview_and_objective_yaml(overview_path, objectives_path, images_path)
+
+    sample_quiz_urls = {}
+    if course_id and access_token:
+        print("Fetching sample quiz pages from Canvas...")
+        sample_quiz_urls = fetch_canvas_pages(course_id, access_token)
+        print(f"Found {len(sample_quiz_urls)} sample quiz pages")
 
     weeks = {}
     for w in set(weeks_column):
@@ -93,8 +70,7 @@ def populate_weeks(
             weeks[weeks_column[index]][weekday]["assigned"] = row[9]
             weeks[weeks_column[index]][weekday]["due"] = row[10]
             
-            # Process quiz information from topic
-            quiz_info = process_quiz_from_topic(row[6])
+            quiz_info = process_quiz_from_topic(row[6], sample_quiz_urls)
             weeks[weeks_column[index]][weekday]["quiz_info"] = quiz_info
             
             prework_title_raw = str(row[11]).strip() if not pd.isna(row[11]) else ""
@@ -150,6 +126,8 @@ if __name__ == "__main__":
         excel_schedule_path=excel_schedule_path,
         overview_path=overview_path,
         objectives_path=objectives_path,
-        images_path=images_path
+        images_path=images_path,
+        course_id=None,  # Canvas credentials not available in direct script run
+        access_token=None
     )
     print(weekly_page_data)
