@@ -101,8 +101,18 @@ def fetch_image_urls_from_site_data(course_id: str, access_token: str, image_nam
     return image_urls
 
 
-def get_image_urls_for_yaml_data(images_data: Dict, course_id: str = None, access_token: str = None) -> Dict:    
-    # Extract all image names from the YAML data
+def get_image_urls_for_yaml_data(images_data: Dict, course_id: str = None, access_token: str = None) -> tuple[Dict, Dict]:    
+    # Separate special icons from weekly images
+    special_icons = {}
+    weekly_images = {}
+    
+    for key, data in images_data.items():
+        if key in ['schedule-icon', 'upcoming-work-icon']:
+            special_icons[key] = data
+        else:
+            weekly_images[key] = data
+    
+    # Extract all image names from both special icons and weekly images
     image_names = []
     for week_data in images_data.values():
         if "image_name" in week_data:
@@ -111,9 +121,9 @@ def get_image_urls_for_yaml_data(images_data: Dict, course_id: str = None, acces
     # Fetch the URLs from Canvas
     image_urls = fetch_image_urls_from_site_data(course_id, access_token, image_names)
     
-    # Update the images_data with the fetched URLs
-    updated_images_data = {}
-    for week_key, week_data in images_data.items():
+    # Process weekly images (maintain existing structure)
+    updated_weekly_images = {}
+    for week_key, week_data in weekly_images.items():
         updated_data = week_data.copy()
         image_name = week_data.get("image_name")
         
@@ -129,6 +139,18 @@ def get_image_urls_for_yaml_data(images_data: Dict, course_id: str = None, acces
             updated_data["image_path"] = f"https://via.placeholder.com/400x300?text={quote(image_name or 'Image Not Found')}"
             updated_data["image_name"] = image_name
             
-        updated_images_data[week_key] = updated_data
+        updated_weekly_images[week_key] = updated_data
     
-    return updated_images_data
+    # Process special icons
+    icon_urls = {}
+    for icon_key, icon_data in special_icons.items():
+        image_name = icon_data.get("image_name")
+        
+        if image_name and image_name in image_urls:
+            icon_urls[icon_key] = image_urls[image_name]
+            print(f"Found {icon_key}: {image_name} -> {image_urls[image_name]}")
+        else:
+            print(f"Warning: Could not find Canvas URL for {icon_key} image '{image_name}'")
+            icon_urls[icon_key] = f"https://via.placeholder.com/50x50?text={quote(icon_key)}"
+    
+    return updated_weekly_images, icon_urls

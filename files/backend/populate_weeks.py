@@ -29,9 +29,8 @@ def populate_weeks(
 
     overview_data, objective_data, images_data = read_overview_and_objective_yaml(overview_path, objectives_path, images_path)
 
-    # Fetch Canvas URLs for images, or use placeholders if credentials not available
-    print("Processing image URLs...")
-    image_urls = get_image_urls_for_yaml_data(images_data, course_id, access_token)
+
+    image_urls, icon_urls = get_image_urls_for_yaml_data(images_data, course_id, access_token)
 
     sample_quiz_urls = {}
     if course_id and access_token:
@@ -100,6 +99,9 @@ def populate_weeks(
         weeks[w]["learning_objectives"] = objective_data[weeks[w]["module"]]["learning_objectives"]
         weeks[w]["learning_objectives_topic"] = objective_data[weeks[w]["module"]]["learning_objectives_topic"]
 
+    # Add icon URLs to the returned data structure
+    weeks["icon_urls"] = icon_urls
+    
     return weeks
 
 def read_overview_and_objective_yaml(

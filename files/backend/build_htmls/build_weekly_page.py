@@ -29,7 +29,8 @@ def build_html(weeks_data, unique_identifier="page", course_id=None, homework_ur
     env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template("me2024_template.html")
 
-    keys = sorted(weeks_data.keys(), key=int)
+    # Filter out non-numeric keys (like 'icon_urls') before sorting
+    keys = sorted([k for k in weeks_data.keys() if str(k).isdigit()], key=int)
 
     if not course_id:
         raise ValueError(
@@ -73,6 +74,7 @@ def build_html(weeks_data, unique_identifier="page", course_id=None, homework_ur
             homework_urls=homework_urls or {},
             quiz_urls=quiz_urls or {},  # Add quiz URLs
             next_quiz=next_quiz,  # Add quiz information
+            icon_urls=weeks_data.get("icon_urls", {}),  # Add icon URLs
         )
 
         # write each HTML file to the unique output subdirectory

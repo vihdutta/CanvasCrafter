@@ -1,3 +1,8 @@
+schedule-icon:
+  image_name: "noun-calendar-7016300.png"
+upcoming-work-icon:
+  image_name: "noun-answer-6277279.png"
+  
 1:
   image_name: "Module1_Rectilinear.png"
   caption: "Diagram of a particle moving in straight-line, rectilinear motion"
