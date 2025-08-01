@@ -73,9 +73,9 @@ class CanvasDeleter:
     def filter_pages_to_delete(self, pages: List[Dict]) -> List[Dict]:
         pages_to_delete = []
 
-        # Patterns to match: "Week #" and "Homework #"
+        # Patterns to match: "Week #" and "HW##"
         week_pattern = re.compile(r"^Week\s+\d+$", re.IGNORECASE)
-        homework_pattern = re.compile(r"^Homework\s+\d+$", re.IGNORECASE)
+        homework_pattern = re.compile(r"^HW\d{2}$", re.IGNORECASE)
 
         for page in pages:
             title = page.get("title", "")
@@ -86,7 +86,7 @@ class CanvasDeleter:
 
     def filter_assignments_to_delete(self, assignments: List[Dict]) -> List[Dict]:
         """
-        Filter assignments that match the deletion criteria: "Homework #"
+        Filter assignments that match the deletion criteria: "Homework #" and "Quiz #"
 
         Args:
             assignments: List of all assignments from Canvas
@@ -96,12 +96,13 @@ class CanvasDeleter:
         """
         assignments_to_delete = []
 
-        # Pattern to match: "Homework #"
+        # Patterns to match: "Homework #" and "Quiz #"
         homework_pattern = re.compile(r"^Homework\s+\d+$", re.IGNORECASE)
+        quiz_pattern = re.compile(r"^Quiz\s+\d+$", re.IGNORECASE)
 
         for assignment in assignments:
             name = assignment.get("name", "")
-            if homework_pattern.match(name):
+            if homework_pattern.match(name) or quiz_pattern.match(name):
                 assignments_to_delete.append(assignment)
 
         return assignments_to_delete
@@ -235,8 +236,8 @@ def main():
     print("🧹 Canvas Item Deletion Script")
     print("=" * 50)
     print("This script will delete Canvas items with these formats:")
-    print("  - Pages: 'Week #' and 'Homework #'")
-    print("  - Assignments: 'Homework #'")
+    print("  - Pages: 'Week #' and 'HW##'")
+    print("  - Assignments: 'Homework #' and 'Quiz #'")
     print()
 
     course_id, access_token = get_credentials()

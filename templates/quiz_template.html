@@ -1,56 +1,33 @@
 <div style="background-color: #d5e0ec; padding-left: 15px;">
     <h2><span style="color: #000000;">Purpose</span></h2>
 </div>
-<p><span>This quiz is designed to assess your understanding of {{ learning_objectives_topic }}</span></p>
-<p><span style="font-family: inherit; font-size: 1.5em; color: var(--ic-brand-font-color-dark);">Module {{ module_number }} Learning Objectives: {{ learning_objectives_topic }}</span></p>
-<div class="content-box">
-    <div class="grid-row">
-        <div class="col-md-12 col-lg-8">
-            <div class="styleguide-section__grid-demo-element">
-                <ul>
-                    {% for objective in learning_objectives %}
-                    <li>{{ objective }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+<p>These quizzes are meant to assess your mastery of this module's learning objectives. By having frequent, lower stakes assessments, we hope to provide timely feedback that can be utilized to best master the content of this course.</p>
+<p>&nbsp;</p>
 <div style="background-color: #d5e0ec; padding-left: 15px;">
-    <h2><span style="color: #000000;">Quiz Details</span></h2>
+    <h2><span style="color: #000000;">Logistics</span></h2>
 </div>
-<p><span><strong>Quiz Date:</strong> {{ quiz_date }}</span></p>
-<p><span><strong>Quiz Topic:</strong> {{ quiz_topic }}</span></p>
-<p><span><strong>Time Limit:</strong> 50 minutes</span></p>
-<p><span><strong>Attempts:</strong> 1</span></p>
-<div style="background-color: #d5e0ec; padding-left: 15px;">
-    <h2><span style="color: #000000;">Study Materials</span></h2>
-</div>
-<p><span>To prepare for this quiz, review the following materials:</span></p>
 <ul>
-    <li><span>All lecture notes and recordings from the current module</span></li>
-    <li><span>Assigned textbook readings</span></li>
-    <li><span>Prework videos and activities</span></li>
-    <li><span>Homework assignments related to this module</span></li>
-    {% if sample_quiz_url %}
-    <li><span><a href="{{ sample_quiz_url }}" target="_blank">Sample Quiz {{ quiz_number }}</a></span></li>
-    {% endif %}
+    <li><span style="text-decoration: underline;"><strong>Date &amp; Time:</strong></span> {{ formatted_quiz_date }} during our normal class period (please try to arrive early so we can get started on time, you will be given the first 40 minutes of the class session to work on the quiz)</li>
+    <li><span style="text-decoration: underline;"><strong>Location:</strong></span> Our normal classroom, 3460 Central Campus Classroom Building. If you have SSD accommodations, you will be taking the assessment in XXX starting at our normal class start time (11:30 AM). A member of our instructional team will meet you there to get you started.</li>
+    <li><span style="text-decoration: underline;"><strong>Materials You're Allowed to Bring for the Quiz:</strong></span> <span>You will only be allowed a writing utensil, eraser, and</span><span>&nbsp;a double</span><span>-sided, hand-written sheet of notes. You are allowed to include anything you want on this sheet of notes, but it must be handwritten (written with a tablet and then printed is fine) in your own handwriting and on a standard letter size piece of paper. No calculators or other electronics are allowed on the assessment.</span></li>
+    <li><span><span style="text-decoration: underline;"><strong>Materials You're Supplied with for the Quiz:</strong></span> You will be supplied with scratch paper in case you find you do not have enough room to show your work on the quiz itself.</span></li>
+    <li><span><strong><span style="text-decoration: underline;">Format:</span></strong> The quiz will consist of one problem with multiple subparts. We are more than happy to award partial credit on the quiz so please try to make an attempt and spell out your thought process for each problem.&nbsp; The grading rubric will always emphasize the process more heavily than the final answer.</span></li>
 </ul>
+<p>&nbsp;</p>
 <div style="background-color: #d5e0ec; padding-left: 15px;">
-    <h2><span style="color: #000000;">Instructions</span></h2>
+    <h2><span style="color: #000000;">Content</span></h2>
 </div>
-<p><span>Please read the following instructions carefully:</span></p>
+<p>This quiz will cover content presented in Module {{ module_number }} of the course. This includes Lessons {{ lesson_range }} and {{ homework_range }}. The learning objectives for this module that can be assessed in this quiz are as follows:</p>
+<h3>Module {{ module_number }} Learning Objectives: {{ learning_objectives_topic }}</h3>
 <ul>
-    <li><span>You will have 50 minutes to complete the quiz</span></li>
-    <li><span>The quiz will be available starting at the beginning of class</span></li>
-    <li><span>Once you start the quiz, you must complete it in one sitting</span></li>
-    <li><span>Make sure you have a stable internet connection</span></li>
-    <li><span>Calculator use is permitted where appropriate</span></li>
-    <li><span>No collaboration is allowed during the quiz</span></li>
+    {% for objective in learning_objectives %}
+    <li>LO{{ loop.index }}: {{ objective }}</li>
+    {% endfor %}
 </ul>
+<p>&nbsp;</p>
 <div style="background-color: #d5e0ec; padding-left: 15px;">
-    <h2><span style="color: #000000;">Support and Resources</span></h2>
+    <h2><span style="color: #000000;">Preparing</span></h2>
 </div>
-<p><span>If you have any questions before the quiz, please visit the instructional team during our scheduled <a title="Instructors and Drop-In Hours" href="https://umich.instructure.com/courses/{{ course_id }}/pages/instructors-and-drop-in-hours-2" data-course-type="wikiPages" data-published="true" data-api-endpoint="https://umich.instructure.com/api/v1/courses/{{ course_id }}/pages/instructors-and-drop-in-hours-2" data-api-returntype="Page">drop-in hours</a>.</span></p>
-<p><span>If you experience technical difficulties during the quiz, please contact the instructional team immediately.</span></p>
+<p>We would highly recommend looking over class notes and the previous homeworks to help you identify topics and learning objectives you may be unclear on to help direct your studying.&nbsp; More than anything, we feel as though attempting new problems you haven't seen before is always a great way to test your understanding of the material.&nbsp; To that effect, we have gone ahead and posted a {% if sample_quiz_url %}<a href="{{ sample_quiz_url }}" data-course-type="wikiPages" data-published="false" data-api-endpoint="{{ sample_quiz_url }}" data-api-returntype="Page">sample quiz</a>{% else %}sample quiz{% endif %} from a previous semester of the course for you to study from. We have also posted several <a title="Additional Example Problems - Module {{ module_number }}" href="https://umich.instructure.com/courses/{{ course_id }}/pages/additional-example-problems-module-{{ module_number }}" data-course-type="wikiPages" data-published="true" data-api-endpoint="https://umich.instructure.com/api/v1/courses/{{ course_id }}/pages/additional-example-problems-module-{{ module_number }}" data-api-returntype="Page">example problems</a> for this module that you can use to practice the content.&nbsp; Additionally, our textbook has numerous example problems throughout the text and practice problems at the end of each chapter you can try.&nbsp;&nbsp;</p>
+<p>Happy studying!</p>
 <p>&nbsp;</p>

@@ -10,6 +10,7 @@ from files.backend.populate_weeks_utils import (
     fetch_canvas_pages,
     process_quiz_from_topic
 )
+from files.backend.get_image_urls import get_image_urls_for_yaml_data
 
 
 # populates the Week objects from the yaml and excel schedule files
@@ -28,6 +29,10 @@ def populate_weeks(
 
     overview_data, objective_data, images_data = read_overview_and_objective_yaml(overview_path, objectives_path, images_path)
 
+    # Fetch Canvas URLs for images, or use placeholders if credentials not available
+    print("Processing image URLs...")
+    image_urls = get_image_urls_for_yaml_data(images_data, course_id, access_token)
+
     sample_quiz_urls = {}
     if course_id and access_token:
         print("Fetching sample quiz pages from Canvas...")
@@ -39,7 +44,7 @@ def populate_weeks(
         weeks[w] = {}
         weeks[w]["module"] = ""
         weeks[w]["overview_statement"] = overview_data[w]["description"]
-        weeks[w]["image"] = images_data[w]
+        weeks[w]["image"] = image_urls[w]
 
     for index, row in df.iterrows():
         if index == 0:

@@ -5,6 +5,11 @@ from datetime import datetime
 from typing import Dict, List, Optional
 from jinja2 import Environment, FileSystemLoader
 from files.backend.populate_weeks_utils import collect_quiz_dates
+from ..quiz_utils import (
+    get_lesson_range_for_module,
+    get_homework_range_for_module,
+    format_quiz_date_time
+)
 
 
 def build_quiz_html(
@@ -53,13 +58,42 @@ def build_quiz_html(
         topic = day_data.get("topic", "")
         quiz_topic = topic.replace(f"QUIZ {quiz['quiz_number']} & ", "")
         
+        # Quiz N should test Module N content (Quiz 1 -> Module 1, Quiz 2 -> Module 2, etc.)
+        module_number = quiz["quiz_number"]
+        
+        # Get lesson and homework ranges for this module
+        lesson_range = get_lesson_range_for_module(weeks_data, module_number)
+        homework_range = get_homework_range_for_module(weeks_data, module_number)
+        
+        # Format the quiz date
+        formatted_quiz_date, day_of_week = format_quiz_date_time(quiz["date"])
+        
+        # Get learning objectives for the correct module
+        # We need to load the objectives data to get the right module's objectives
+        try:
+            import yaml
+            objectives_path = "files/yaml/learning_objectives.yaml"
+            with open(objectives_path, "r", encoding="utf-8") as f:
+                objective_data = yaml.safe_load(f)
+            
+            module_objectives = objective_data.get(module_number, {})
+            learning_objectives = module_objectives.get("learning_objectives", [])
+            learning_objectives_topic = module_objectives.get("learning_objectives_topic", "General")
+        except Exception as e:
+            print(f"Warning: Could not load learning objectives for module {module_number}: {e}")
+            learning_objectives = []
+            learning_objectives_topic = "General"
+        
         html = template.render(
             quiz_number=quiz["quiz_number"],
             quiz_date=quiz["date"],
+            formatted_quiz_date=formatted_quiz_date,
             quiz_topic=quiz_topic,
-            module_number=week_data.get("module", 1),
-            learning_objectives=week_data.get("learning_objectives", []),
-            learning_objectives_topic=week_data.get("learning_objectives_topic", "General"),
+            module_number=module_number,
+            lesson_range=lesson_range,
+            homework_range=homework_range,
+            learning_objectives=learning_objectives,
+            learning_objectives_topic=learning_objectives_topic,
             sample_quiz_url=quiz_info.get("sample_quiz_url", ""),
             course_id=course_id,
         )

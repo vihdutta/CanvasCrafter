@@ -133,7 +133,7 @@ async def generate(path: str):
 
                 homework_files.append(
                     {
-                        "name": f"Homework {hw_number}",
+                        "name": f"HW{int(hw_number):02d}",
                         "html": html_content,
                         "type": "homework",
                         "hw_number": hw_number,
@@ -248,7 +248,7 @@ async def upload_to_canvas(
             try:
                 filename = os.path.basename(filepath)
                 hw_number = filename.split("_")[1]
-                title = f"Homework {hw_number}"
+                title = f"HW{int(hw_number):02d}"
 
                 with open(filepath, "r", encoding="utf-8") as f:
                     html_content = f.read()
