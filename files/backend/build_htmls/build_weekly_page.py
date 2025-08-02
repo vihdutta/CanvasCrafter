@@ -9,7 +9,7 @@ from files.backend.build_htmls.build_hw import build_homework_html
 from files.backend.build_htmls.build_quiz import build_quiz_html
 
 # Import quiz utility functions
-from files.backend.populate_weeks_utils import find_next_quiz
+from files.backend.populate_weeks_utils import find_next_quiz, get_week_title_with_topic_and_date
 
 
 # builds all html files and returns list containing the built files' names
@@ -51,14 +51,16 @@ def build_html(weeks_data, unique_identifier="page", course_id=None, homework_ur
         prev_slug = f"week-{prev_week_num}" if prev_week_num > 100 else None
         next_slug = f"week-{next_week_num}" if i < len(keys) - 1 else None
 
-        # Generate navigation text with links
+        # Generate navigation text with links using new title format
         if prev_slug:
-            last_week_text = f'<a href="https://umich.instructure.com/courses/{course_id}/pages/{prev_slug}">Week {prev_week_num}</a>'
+            prev_week_title = get_week_title_with_topic_and_date(weeks_data, prev_week_num)
+            last_week_text = f'<a href="https://umich.instructure.com/courses/{course_id}/pages/{prev_slug}">{prev_week_title}</a>'
         else:
             last_week_text = "N/A"
 
         if next_slug:
-            next_week_text = f'<a href="https://umich.instructure.com/courses/{course_id}/pages/{next_slug}">Week {next_week_num}</a>'
+            next_week_title = get_week_title_with_topic_and_date(weeks_data, next_week_num)
+            next_week_text = f'<a href="https://umich.instructure.com/courses/{course_id}/pages/{next_slug}">{next_week_title}</a>'
         else:
             next_week_text = "N/A"
 

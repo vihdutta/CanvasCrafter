@@ -15,6 +15,53 @@ def title_to_url_safe(title: str) -> str:
     return url_safe
 
 
+def get_week_title_with_topic_and_date(weeks_data: Dict, display_week_num: int) -> str:
+    """
+    Generate week title in format: "Week #: <topic> (MM/DD/YYYY)"
+    
+    Args:
+        weeks_data: Dictionary containing all weeks data
+        display_week_num: The adjusted week number (e.g., 101, 102, etc.)
+    
+    Returns:
+        Formatted title string
+    """
+    # Convert display week number back to original week number (subtract 100)
+    original_week_num = display_week_num - 100
+    
+    if original_week_num not in weeks_data:
+        return f"Week {display_week_num}"
+    
+    week_data = weeks_data[original_week_num]
+    
+    # Find the first topic and earliest date from the week's days
+    topic = ""
+    earliest_date = ""
+    
+    weekday_order = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+    
+    for weekday in weekday_order:
+        if weekday in week_data:
+            day_data = week_data[weekday]
+            
+            # Get the first non-empty topic found
+            if not topic and "topic" in day_data and day_data["topic"]:
+                topic = str(day_data["topic"]).strip()
+            
+            # Get the earliest date found
+            if not earliest_date and "date" in day_data and day_data["date"]:
+                earliest_date = str(day_data["date"]).strip()
+                break  # Since we iterate in order, first date found is earliest
+    
+    # Format the title
+    if topic and earliest_date:
+        return f"Week {display_week_num}: {topic} ({earliest_date})"
+    elif topic:
+        return f"Week {display_week_num}: {topic}"
+    else:
+        return f"Week {display_week_num}"
+
+
 def fetch_canvas_pages(course_id: str, access_token: str) -> Dict[str, str]:
     quiz_pages = {}
     

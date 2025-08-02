@@ -3,6 +3,7 @@ import uuid
 import os
 import glob
 import json
+import pickle
 from fastapi import (
     FastAPI,
     Request,
@@ -22,6 +23,7 @@ from files.backend.upload_to_canvas import upload_page
 from files.backend.zip_built_htmls import zip_stream
 from files.backend.build_htmls.build_hw import upload_homework_assignment
 from files.backend.build_htmls.build_quiz import upload_quiz_assignment
+from files.backend.populate_weeks_utils import get_week_title_with_topic_and_date
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -118,6 +120,16 @@ async def generate(path: str):
                 status_code=status.HTTP_404_NOT_FOUND, detail="No generated files found"
             )
 
+        # Load weeks_data for proper title generation
+        weeks_data_file = os.path.join(temp_dir, "weeks_data.pkl")
+        weeks_data = None
+        if os.path.exists(weeks_data_file):
+            try:
+                with open(weeks_data_file, "rb") as f:
+                    weeks_data = pickle.load(f)
+            except Exception as e:
+                print(f"Warning: Could not load weeks_data.pkl: {e}")
+
         # Separate weekly pages from homework files
         weekly_files = []
         homework_files = []
@@ -154,12 +166,23 @@ async def generate(path: str):
                     }
                 )
             elif filename.startswith("week_"):
-                # weekly page file
-                week_name = (
-                    filename.replace(f"_{unique_identifier}.html", "")
-                    .replace("_", " ")
-                    .title()
-                )
+                # weekly page file - extract week number and generate proper title
+                week_number_str = filename.replace(f"_{unique_identifier}.html", "").replace("week_", "")
+                try:
+                    display_week_num = int(week_number_str)
+                    if weeks_data:
+                        week_name = get_week_title_with_topic_and_date(weeks_data, display_week_num)
+                    else:
+                        # Fallback to old format if weeks_data not available
+                        week_name = f"Week {display_week_num}"
+                except ValueError:
+                    # Fallback to old format if parsing fails
+                    week_name = (
+                        filename.replace(f"_{unique_identifier}.html", "")
+                        .replace("_", " ")
+                        .title()
+                    )
+                
                 with open(html_file, "r", encoding="utf-8") as f:
                     html_content = f.read()
 
@@ -242,6 +265,17 @@ async def upload_to_canvas(
         homework_files = [f for f in html_files if os.path.basename(f).startswith("homework_")]
         quiz_files = [f for f in html_files if os.path.basename(f).startswith("quiz_")]
         weekly_files = [f for f in html_files if not os.path.basename(f).startswith("homework_") and not os.path.basename(f).startswith("quiz_")]
+        
+        # Load weeks_data for proper title generation
+        temp_dir = os.path.join("temp", file_group_identifier)
+        weeks_data_file = os.path.join(temp_dir, "weeks_data.pkl")
+        weeks_data = None
+        if os.path.exists(weeks_data_file):
+            try:
+                with open(weeks_data_file, "rb") as f:
+                    weeks_data = pickle.load(f)
+            except Exception as e:
+                print(f"Warning: Could not load weeks_data.pkl: {e}")
         
         # STEP 1: Upload homework assignments FIRST
         for filepath in homework_files:
@@ -413,13 +447,24 @@ async def upload_to_canvas(
         for filepath in updated_weekly_files:
             try:
                 filename = os.path.basename(filepath)
-                title = (
-                    os.path.splitext(filename)[0]
-                    .replace(file_group_identifier, "")
-                    .replace("_", " ")
-                    .title()
-                    .strip()
-                )
+                
+                # Extract week number and generate proper title
+                base_filename = os.path.splitext(filename)[0].replace(file_group_identifier, "").strip()
+                if base_filename.startswith("week_"):
+                    week_number_str = base_filename.replace("week_", "").replace("_", "")
+                    try:
+                        display_week_num = int(week_number_str)
+                        if weeks_data:
+                            title = get_week_title_with_topic_and_date(weeks_data, display_week_num)
+                        else:
+                            # Fallback to old format if weeks_data not available
+                            title = f"Week {display_week_num}"
+                    except ValueError:
+                        # Fallback to old format if parsing fails
+                        title = base_filename.replace("_", " ").title()
+                else:
+                    # Fallback to old format for non-weekly files
+                    title = base_filename.replace("_", " ").title()
 
                 with open(filepath, "r", encoding="utf-8") as f:
                     html_content = f.read()
