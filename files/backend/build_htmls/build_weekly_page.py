@@ -1,19 +1,28 @@
 import os
-import re
 import glob
 import pickle
-from typing import List
 from jinja2 import Environment, FileSystemLoader
 from files.backend.populate_weeks import populate_weeks
 from files.backend.build_htmls.build_hw import build_homework_html
 from files.backend.build_htmls.build_quiz import build_quiz_html
+from files.backend.build_htmls.build_checkout import build_checkout_html
 
 # Import quiz utility functions
-from files.backend.populate_weeks_utils import find_next_quiz, get_week_title_with_topic_and_date
+from files.backend.populate_weeks_utils import (
+    find_next_quiz,
+    get_week_title_with_topic_and_date,
+    title_to_url_safe,
+)
 
 
 # builds all html files and returns list containing the built files' names
-def build_html(weeks_data, unique_identifier="page", course_id=None, homework_urls=None, quiz_urls=None):
+def build_html(
+    weeks_data,
+    unique_identifier="page",
+    course_id=None,
+    homework_urls=None,
+    quiz_urls=None,
+):
     template_dir = os.path.join(
         os.path.dirname(__file__), "..", "..", "..", "templates"
     )
@@ -41,25 +50,37 @@ def build_html(weeks_data, unique_identifier="page", course_id=None, homework_ur
         curr_week = weeks_data[key]
 
         # Artificially adjust week numbers to start at 17
-        display_week_num = int(key) + 100  # This makes week 1 become week 17
+        display_week_num = int(key) + 16  # This makes week 1 become week 17
 
         # Generate navigation links
         prev_week_num = display_week_num - 1
         next_week_num = display_week_num + 1
 
-        # Create URL-safe slugs
-        prev_slug = f"week-{prev_week_num}" if prev_week_num > 100 else None
-        next_slug = f"week-{next_week_num}" if i < len(keys) - 1 else None
+        # Create URL-safe slugs using the same logic as upload_to_canvas
+        prev_slug = None
+        next_slug = None
+
+        if prev_week_num > 16:
+            prev_week_title = get_week_title_with_topic_and_date(
+                weeks_data, prev_week_num
+            )
+            # Convert title to URL-safe slug using the same function as everywhere else
+            prev_slug = title_to_url_safe(prev_week_title)
+
+        if i < len(keys) - 1:
+            next_week_title = get_week_title_with_topic_and_date(
+                weeks_data, next_week_num
+            )
+            # Convert title to URL-safe slug using the same function as everywhere else
+            next_slug = title_to_url_safe(next_week_title)
 
         # Generate navigation text with links using new title format
         if prev_slug:
-            prev_week_title = get_week_title_with_topic_and_date(weeks_data, prev_week_num)
             last_week_text = f'<a href="https://umich.instructure.com/courses/{course_id}/pages/{prev_slug}">{prev_week_title}</a>'
         else:
             last_week_text = "N/A"
 
         if next_slug:
-            next_week_title = get_week_title_with_topic_and_date(weeks_data, next_week_num)
             next_week_text = f'<a href="https://umich.instructure.com/courses/{course_id}/pages/{next_slug}">{next_week_title}</a>'
         else:
             next_week_text = "N/A"
@@ -88,15 +109,17 @@ def build_html(weeks_data, unique_identifier="page", course_id=None, homework_ur
     print(f"Rendered HTML files for all weeks in: {output_dir}")
 
 
-def regenerate_weekly_pages_with_homework_urls(temp_dir, homework_urls, course_id, quiz_urls=None):
+def regenerate_weekly_pages_with_homework_urls(
+    temp_dir, homework_urls, course_id, quiz_urls=None
+):
     """
     Regenerate weekly pages with homework URLs and quiz URLs for proper linking.
     This function is called after homework assignments and quizzes are uploaded to Canvas.
     """
-    
+
     # Look for a saved weeks_data file or reconstruct from existing files
     weeks_data_file = os.path.join(temp_dir, "weeks_data.pkl")
-    
+
     if os.path.exists(weeks_data_file):
         # Load the saved weeks data
         with open(weeks_data_file, "rb") as f:
@@ -107,7 +130,7 @@ def regenerate_weekly_pages_with_homework_urls(temp_dir, homework_urls, course_i
         weekly_files = glob.glob(os.path.join(temp_dir, "week_*.html"))
         if not weekly_files:
             raise Exception("No weekly files found to extract identifier")
-        
+
         # Extract unique identifier from filename
         filename = os.path.basename(weekly_files[0])
         # Format: week_1_<unique_identifier>.html
@@ -116,24 +139,29 @@ def regenerate_weekly_pages_with_homework_urls(temp_dir, homework_urls, course_i
             unique_identifier = "_".join(parts[2:]).replace(".html", "")
         else:
             raise Exception("Could not extract unique identifier from filename")
-        
+
         # We'll need to regenerate from scratch - this is a fallback
         # For now, let's use the existing approach but this is not ideal
         raise Exception("Cannot regenerate without original weeks data")
-    
+
     # Extract unique identifier from temp_dir path
     unique_identifier = os.path.basename(temp_dir)
-    
+
     # Regenerate weekly pages with homework URLs and quiz URLs
     build_html(weeks_data, unique_identifier, course_id, homework_urls, quiz_urls)
-    
+
     # Return list of regenerated weekly files
     return glob.glob(os.path.join(temp_dir, "week_*.html"))
 
 
-# builds the html files from the upload, 
+# builds the html files from the upload,
 def build_from_upload(
-    file, uuid_module, upload_dir: str, contents: bytes, course_id: str = None, access_token: str = None
+    file,
+    uuid_module,
+    upload_dir: str,
+    contents: bytes,
+    course_id: str = None,
+    access_token: str = None,
 ) -> str:
     ext = os.path.splitext(file.filename)[1].lower()
     unique_identifier = uuid_module.uuid4().hex
@@ -164,10 +192,13 @@ def build_from_upload(
     weeks_data_file = os.path.join(temp_dir, "weeks_data.pkl")
     with open(weeks_data_file, "wb") as f:
         pickle.dump(weekly_page_data, f)
-    
+
     build_html(weekly_page_data, unique_identifier, course_id)
     build_homework_html(weekly_page_data, unique_identifier, course_id)
     build_quiz_html(weekly_page_data, unique_identifier, course_id)  # Add quiz building
+    build_checkout_html(
+        weekly_page_data, unique_identifier, course_id
+    )  # Add checkout building (no homework URLs yet)
 
     os.remove(excel_schedule_path)
 
@@ -186,8 +217,9 @@ if __name__ == "__main__":
         objectives_path=objectives_path,
         images_path=images_path,
         course_id=None,  # Canvas credentials not available in direct script run
-        access_token=None
+        access_token=None,
     )
 
     build_html(weekly_page_data, course_id=123456)
     build_homework_html(weekly_page_data, course_id=123456)
+    build_checkout_html(weekly_page_data, course_id=123456)

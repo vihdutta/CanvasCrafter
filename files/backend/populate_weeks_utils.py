@@ -26,8 +26,8 @@ def get_week_title_with_topic_and_date(weeks_data: Dict, display_week_num: int) 
     Returns:
         Formatted title string
     """
-    # Convert display week number back to original week number (subtract 100)
-    original_week_num = display_week_num - 100
+    # Convert display week number back to original week number (subtract 16)
+    original_week_num = display_week_num - 16
     
     if original_week_num not in weeks_data:
         return f"Week {display_week_num}"

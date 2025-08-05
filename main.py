@@ -23,6 +23,7 @@ from files.backend.upload_to_canvas import upload_page
 from files.backend.zip_built_htmls import zip_stream
 from files.backend.build_htmls.build_hw import upload_homework_assignment
 from files.backend.build_htmls.build_quiz import upload_quiz_assignment
+from files.backend.build_htmls.build_checkout import upload_checkout_assignment
 from files.backend.populate_weeks_utils import get_week_title_with_topic_and_date
 
 app = FastAPI()
@@ -134,6 +135,7 @@ async def generate(path: str):
         weekly_files = []
         homework_files = []
         quiz_files = []
+        checkout_files = []
 
         for html_file in html_files:
             filename = os.path.basename(html_file)
@@ -163,6 +165,20 @@ async def generate(path: str):
                         "html": html_content,
                         "type": "quiz",
                         "quiz_number": quiz_number,
+                    }
+                )
+            elif filename.startswith("checkout_"):
+                # checkout file
+                checkout_number = filename.split("_")[1]
+                with open(html_file, "r", encoding="utf-8") as f:
+                    html_content = f.read()
+
+                checkout_files.append(
+                    {
+                        "name": f"Checkout{checkout_number}",
+                        "html": html_content,
+                        "type": "checkout",
+                        "checkout_number": checkout_number,
                     }
                 )
             elif filename.startswith("week_"):
@@ -217,8 +233,17 @@ async def generate(path: str):
 
         quiz_files = sorted(quiz_files, key=get_quiz_number)
 
-        # Combine weekly, homework, and quiz files
-        all_files = weekly_files + homework_files + quiz_files
+        # Sort checkout files numerically by checkout number
+        def get_checkout_number(item):
+            try:
+                return int(item.get("checkout_number", "0"))
+            except (ValueError, AttributeError):
+                return float("inf")
+
+        checkout_files = sorted(checkout_files, key=get_checkout_number)
+
+        # Combine weekly, homework, quiz, and checkout files
+        all_files = weekly_files + homework_files + quiz_files + checkout_files
 
         return all_files
 
@@ -260,11 +285,13 @@ async def upload_to_canvas(
         success_count = 0
         homework_urls = {}  # Dictionary to store homework assignment URLs
         quiz_urls = {}  # Dictionary to store quiz assignment URLs
+        checkout_urls = {}  # Dictionary to store checkout assignment URLs
         
-        # Separate homework, quiz, and weekly files
+        # Separate homework, quiz, checkout, and weekly files
         homework_files = [f for f in html_files if os.path.basename(f).startswith("homework_")]
         quiz_files = [f for f in html_files if os.path.basename(f).startswith("quiz_")]
-        weekly_files = [f for f in html_files if not os.path.basename(f).startswith("homework_") and not os.path.basename(f).startswith("quiz_")]
+        checkout_files = [f for f in html_files if os.path.basename(f).startswith("checkout_")]
+        weekly_files = [f for f in html_files if not os.path.basename(f).startswith("homework_") and not os.path.basename(f).startswith("quiz_") and not os.path.basename(f).startswith("checkout_")]
         
         # Load weeks_data for proper title generation
         temp_dir = os.path.join("temp", file_group_identifier)
@@ -425,7 +452,91 @@ async def upload_to_canvas(
                     + "\n\n"
                 )
         
-        # STEP 3: Regenerate weekly pages with homework URLs and quiz URLs and upload them
+        # STEP 3: Upload checkout assignments THIRD (after homework and quiz, since they reference homework)
+        # First, regenerate checkout HTML with homework URLs for proper linking
+        if weeks_data and homework_urls:
+            try:
+                from files.backend.build_htmls.build_checkout import build_checkout_html
+                updated_checkout_files = build_checkout_html(weeks_data, file_group_identifier, course_id, homework_urls)
+                # Update the checkout_files list to use the regenerated files
+                checkout_files = updated_checkout_files
+            except Exception as e:
+                print(f"Warning: Could not regenerate checkout files with homework URLs: {e}")
+        
+        for filepath in checkout_files:
+            try:
+                filename = os.path.basename(filepath)
+                checkout_number = filename.split("_")[1]
+                title = f"Checkout{checkout_number}"
+
+                with open(filepath, "r", encoding="utf-8") as f:
+                    html_content = f.read()
+
+                # Try to extract due date from HTML content if available
+                due_date = None
+                import re
+                due_match = re.search(r"(\d{1,2}/\d{1,2}/\d{4})", html_content)
+                if due_match:
+                    due_date = due_match.group(1)
+
+                result = upload_checkout_assignment(
+                    title, html_content, course_id, access_token, due_date
+                )
+
+                if result.get("success"):
+                    success_count += 1
+                    assignment_id = result.get("assignment_id")
+                    # Store the checkout URL for linking in weekly pages if needed
+                    checkout_urls[title] = f"https://umich.instructure.com/courses/{course_id}/assignments/{assignment_id}"
+                    
+                    yield (
+                        "data: "
+                        + json.dumps(
+                            {
+                                "type": "success",
+                                "title": title,
+                                "assignment_id": assignment_id,
+                                "url": result.get("url"),
+                                "current": success_count,
+                                "total": len(html_files),
+                                "item_type": "checkout",
+                            }
+                        )
+                        + "\n\n"
+                    )
+                else:
+                    yield (
+                        "data: "
+                        + json.dumps(
+                            {
+                                "type": "error",
+                                "title": title,
+                                "error": result.get("error", "Unknown error"),
+                                "current": success_count,
+                                "total": len(html_files),
+                                "item_type": "checkout",
+                            }
+                        )
+                        + "\n\n"
+                    )
+
+            except Exception as e:
+                yield (
+                    "data: "
+                    + json.dumps(
+                        {
+                            "type": "error",
+                            "title": title,
+                            "error": str(e),
+                            "current": success_count,
+                            "total": len(html_files),
+                            "item_type": "checkout",
+                        }
+                    )
+                    + "\n\n"
+                )
+        
+        # STEP 4: Regenerate weekly pages with homework URLs, quiz URLs, and checkout URLs and upload them
         try:
             # Get the original weeks data to regenerate pages with homework and quiz links
             temp_dir = os.path.join("temp", file_group_identifier)
@@ -443,7 +554,7 @@ async def upload_to_canvas(
             print(f"Warning: Could not regenerate weekly pages with homework and quiz URLs: {e}")
             updated_weekly_files = weekly_files
         
-        # STEP 4: Upload the weekly pages
+        # STEP 5: Upload the weekly pages
         for filepath in updated_weekly_files:
             try:
                 filename = os.path.basename(filepath)

@@ -3,6 +3,9 @@ import re
 import requests
 import sys
 from typing import List, Dict, Tuple
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class CanvasDeleter:
@@ -73,8 +76,8 @@ class CanvasDeleter:
     def filter_pages_to_delete(self, pages: List[Dict]) -> List[Dict]:
         pages_to_delete = []
 
-        # Patterns to match: "Week #" and "HW##"
-        week_pattern = re.compile(r"^Week\s+\d+$", re.IGNORECASE)
+        # Patterns to match: "Week #" (simple format), "Week #: Topic (Date)" (detailed format), and "HW##"
+        week_pattern = re.compile(r"^Week\s+\d+.*$", re.IGNORECASE)
         homework_pattern = re.compile(r"^HW\d{2}$", re.IGNORECASE)
 
         for page in pages:
@@ -86,7 +89,7 @@ class CanvasDeleter:
 
     def filter_assignments_to_delete(self, assignments: List[Dict]) -> List[Dict]:
         """
-        Filter assignments that match the deletion criteria: "Homework #" and "Quiz #"
+        Filter assignments that match the deletion criteria: "Checkout#", "Quiz #", and "HW##"
 
         Args:
             assignments: List of all assignments from Canvas
@@ -96,13 +99,16 @@ class CanvasDeleter:
         """
         assignments_to_delete = []
 
-        # Patterns to match: "Homework #" and "Quiz #"
-        homework_pattern = re.compile(r"^Homework\s+\d+$", re.IGNORECASE)
+        # Patterns to match: "Checkout#", "Quiz #", and "HW##"
+        checkout_pattern = re.compile(r"^Checkout\d+$", re.IGNORECASE)
         quiz_pattern = re.compile(r"^Quiz\s+\d+$", re.IGNORECASE)
+        homework_pattern = re.compile(r"^HW\d{2}$", re.IGNORECASE)
 
         for assignment in assignments:
             name = assignment.get("name", "")
-            if homework_pattern.match(name) or quiz_pattern.match(name):
+            if (checkout_pattern.match(name) or 
+                quiz_pattern.match(name) or 
+                homework_pattern.match(name)):
                 assignments_to_delete.append(assignment)
 
         return assignments_to_delete
@@ -236,8 +242,8 @@ def main():
     print("🧹 Canvas Item Deletion Script")
     print("=" * 50)
     print("This script will delete Canvas items with these formats:")
-    print("  - Pages: 'Week #' and 'HW##'")
-    print("  - Assignments: 'Homework #' and 'Quiz #'")
+    print("  - Pages: 'Week #' (and variations like 'Week #: Topic (Date)') and 'HW##'")
+    print("  - Assignments: 'Checkout#', 'Quiz #', and 'HW##'")
     print()
 
     course_id, access_token = get_credentials()
