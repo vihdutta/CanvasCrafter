@@ -6,12 +6,16 @@ from files.backend.populate_weeks import populate_weeks
 from files.backend.build_htmls.build_hw import build_homework_html
 from files.backend.build_htmls.build_quiz import build_quiz_html
 from files.backend.build_htmls.build_checkout import build_checkout_html
+from files.backend.pdf_utils import fetch_course_pdfs
 
-# Import quiz utility functions
+# Import quiz and checkout utility functions
 from files.backend.populate_weeks_utils import (
     find_next_quiz,
+    find_next_checkout,
     get_week_title_with_topic_and_date,
     title_to_url_safe,
+    collect_homework_assignments_opening_during_week,
+    collect_homework_assignments_due_during_week,
 )
 
 
@@ -22,6 +26,8 @@ def build_html(
     course_id=None,
     homework_urls=None,
     quiz_urls=None,
+    checkout_urls=None,
+    access_token=None,
 ):
     template_dir = os.path.join(
         os.path.dirname(__file__), "..", "..", "..", "templates"
@@ -46,11 +52,19 @@ def build_html(
             "Course ID is required. Please set a Course ID in the Course Configuration section."
         )
 
+    # Fetch PDF URLs for course information if access token is provided
+    pdf_urls = {}
+    if access_token:
+        pdf_urls = fetch_course_pdfs(course_id, access_token)
+        print(f"Fetched PDF URLs: {pdf_urls}")
+    else:
+        print("Warning: No access token provided, course PDFs will not be linked")
+
     for i, key in enumerate(keys):
         curr_week = weeks_data[key]
 
-        # Artificially adjust week numbers to start at 17
-        display_week_num = int(key) + 16  # This makes week 1 become week 17
+        # Artificially adjust week numbers to start at 37
+        display_week_num = int(key)
 
         # Generate navigation links
         prev_week_num = display_week_num - 1
@@ -60,7 +74,7 @@ def build_html(
         prev_slug = None
         next_slug = None
 
-        if prev_week_num > 16:
+        if prev_week_num > 0:
             prev_week_title = get_week_title_with_topic_and_date(
                 weeks_data, prev_week_num
             )
@@ -88,6 +102,17 @@ def build_html(
         # Find next upcoming quiz for this week
         next_quiz = find_next_quiz(weeks_data, int(key))
 
+        # Find next upcoming checkout for this week
+        next_checkout = find_next_checkout(weeks_data, int(key))
+
+        # Collect homework assignments for this week
+        homework_opening_this_week = collect_homework_assignments_opening_during_week(
+            weeks_data, int(key)
+        )
+        homework_due_this_week = collect_homework_assignments_due_during_week(
+            weeks_data, int(key)
+        )
+
         html = template.render(
             week=curr_week,
             week_number=display_week_num,
@@ -96,8 +121,14 @@ def build_html(
             course_id=course_id,
             homework_urls=homework_urls or {},
             quiz_urls=quiz_urls or {},  # Add quiz URLs
+            checkout_urls=checkout_urls or {},  # Add checkout URLs
             next_quiz=next_quiz,  # Add quiz information
+            next_checkout=next_checkout,  # Add checkout information
+            homework_opening_this_week=homework_opening_this_week,  # Homework assignments opening this week
+            homework_due_this_week=homework_due_this_week,  # Homework assignments due this week
             icon_urls=weeks_data.get("icon_urls", {}),  # Add icon URLs
+            lecture_info=weeks_data.get("lecture_info", {}),  # Add lecture info
+            pdf_urls=pdf_urls,  # Add PDF URLs for course information
         )
 
         # write each HTML file to the unique output subdirectory
@@ -110,7 +141,12 @@ def build_html(
 
 
 def regenerate_weekly_pages_with_homework_urls(
-    temp_dir, homework_urls, course_id, quiz_urls=None
+    temp_dir,
+    homework_urls,
+    course_id,
+    quiz_urls=None,
+    checkout_urls=None,
+    access_token=None,
 ):
     """
     Regenerate weekly pages with homework URLs and quiz URLs for proper linking.
@@ -148,7 +184,15 @@ def regenerate_weekly_pages_with_homework_urls(
     unique_identifier = os.path.basename(temp_dir)
 
     # Regenerate weekly pages with homework URLs and quiz URLs
-    build_html(weeks_data, unique_identifier, course_id, homework_urls, quiz_urls)
+    build_html(
+        weeks_data,
+        unique_identifier,
+        course_id,
+        homework_urls,
+        quiz_urls,
+        checkout_urls,
+        access_token,
+    )
 
     # Return list of regenerated weekly files
     return glob.glob(os.path.join(temp_dir, "week_*.html"))
@@ -184,6 +228,7 @@ def build_from_upload(
         images_path=images_path,
         course_id=course_id,
         access_token=access_token,
+        lecture_info_path="files/yaml/lecture_info.yaml",
     )
 
     # Save the weeks data for later use in regeneration
@@ -193,8 +238,10 @@ def build_from_upload(
     with open(weeks_data_file, "wb") as f:
         pickle.dump(weekly_page_data, f)
 
-    build_html(weekly_page_data, unique_identifier, course_id)
-    build_homework_html(weekly_page_data, unique_identifier, course_id)
+    build_html(
+        weekly_page_data, unique_identifier, course_id, access_token=access_token
+    )
+    build_homework_html(weekly_page_data, unique_identifier, course_id, access_token)
     build_quiz_html(weekly_page_data, unique_identifier, course_id)  # Add quiz building
     build_checkout_html(
         weekly_page_data, unique_identifier, course_id
@@ -218,8 +265,10 @@ if __name__ == "__main__":
         images_path=images_path,
         course_id=None,  # Canvas credentials not available in direct script run
         access_token=None,
+        lecture_info_path="files/yaml/lecture_info.yaml",
     )
 
-    build_html(weekly_page_data, course_id=123456)
-    build_homework_html(weekly_page_data, course_id=123456)
-    build_checkout_html(weekly_page_data, course_id=123456)
+    # Example usage - replace with actual course_id when using
+    # build_html(weekly_page_data, course_id="YOUR_COURSE_ID", access_token=None)
+    # build_homework_html(weekly_page_data, course_id="YOUR_COURSE_ID", access_token=None)
+    # build_checkout_html(weekly_page_data, course_id="YOUR_COURSE_ID")

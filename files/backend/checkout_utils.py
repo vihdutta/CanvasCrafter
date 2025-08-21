@@ -173,10 +173,10 @@ def generate_checkout_task_text(homework_number: str, checkout_number: str, home
     if homework_number:
         if homework_url:
             # Create a clickable link to the homework assignment
-            homework_ref = f'<a href="{homework_url}" target="_blank" rel="noopener">Homework {homework_number}, Problem XXX</a>'
+            homework_ref = f'<a href="{homework_url}" rel="noopener">Homework {homework_number}, Problem <span style="background-color: yellow;">XXX</span></a>'
         else:
             # Fallback to plain text if no URL available
-            homework_ref = f"Homework {homework_number}, Problem XXX"
+            homework_ref = f"Homework {homework_number}, Problem <span style=\"background-color: yellow;\">XXX</span>"
         return f"Your checkout group is tasked with demonstrating and explaining your solution to this module's checkout problem ({homework_ref}) using the whiteboard as your primary medium to show your approach."
     else:
-        return f"Your checkout group is tasked with demonstrating and explaining your solution to this module's checkout problem using the whiteboard as your primary medium to show your approach." 
+        return "Your checkout group is tasked with demonstrating and explaining your solution to this module's checkout problem using the whiteboard as your primary medium to show your approach." 

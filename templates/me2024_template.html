@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>version 4 test sandbox v2</title>
     <style>
         body {
             font-family: sans-serif;
@@ -79,7 +78,7 @@
                         </div>
                         <p style="text-align: center;"><span style="color: #000000;">Last Week:</span> {{ last_week_text|safe }}</p>
                         <p style="text-align: center;"><span style="color: #000000;">Next Week:</span> {{ next_week_text|safe }}</p>
-                        <p style="text-align: center;"><a href="https://umich.instructure.com/courses/{{ course_id }}/modules" target="_blank">See the Full Course Schedule</a></p>
+                        <p style="text-align: center;"><a href="https://umich.instructure.com/courses/{{ course_id }}/modules">See the Full Course Schedule</a></p>
                     </div>
                 </div>
             </div>
@@ -89,78 +88,46 @@
                         <div style="background-color: #d5e0ec; padding-left: 15px;">
                             <h3 style="text-align: center;"><span style="color: #000000;"><img role="presentation" src="{{ icon_urls.get('upcoming-work-icon', 'https://via.placeholder.com/24x26?text=Work') }}" alt="Upcoming Work Icon" width="24" height="26" /> UPCOMING WORK</span></h3>
                         </div>
-                        <ul>
-                            <!-- UPCOMING WORK -->
-                            <!-- Note: "OPENS" means "assigned" -->
+                        <!-- UPCOMING WORK -->
+                        <!-- Note: Homework assignments are now clearly separated by type -->
 
-                            <!-- DUE HW -->
-                            {% if "monday" in week and week.monday.due %}
-                                {% set hw_name = week.monday.due.replace("HW", "HOMEWORK ") %}
-                                {% set hw_name_key = week.monday.due.replace("HW", "Homework ") %}
-                                {% if homework_urls and hw_name_key in homework_urls %}
-                                    <li><a href="{{ homework_urls[hw_name_key] }}" target="_blank">{{ hw_name }}</a>: DUE {{ week.monday.date }}</li>
-                                {% else %}
-                                    <li>{{ hw_name }}: DUE {{ week.monday.date }}</li>
-                                {% endif %}
+                        <!-- HOMEWORK ASSIGNMENTS DUE THIS WEEK -->
+                        {% for hw in homework_due_this_week %}
+                            {% if homework_urls and hw.homework_key in homework_urls %}
+                                <p style="text-align: center;"><span style="font-size: 14pt;"><span style="color: #000000;"><a href="{{ homework_urls[hw.homework_key] }}">HOMEWORK {{ hw.homework_number }}</a>: </span><span style="color: #6b0707;">DUE {{ hw.due_date }}</span></span></p>
+                            {% else %}
+                                <p style="text-align: center;"><span style="font-size: 14pt;"><span style="color: #000000;">HOMEWORK {{ hw.homework_number }}: </span><span style="color: #6b0707;">DUE {{ hw.due_date }}</span></span></p>
                             {% endif %}
-                            {% if "wednesday" in week and week.wednesday.due %}
-                                {% set hw_name = week.wednesday.due.replace("HW", "HOMEWORK ") %}
-                                {% set hw_name_key = week.wednesday.due.replace("HW", "Homework ") %}
-                                {% if homework_urls and hw_name_key in homework_urls %}
-                                    <li><a href="{{ homework_urls[hw_name_key] }}" target="_blank">{{ hw_name }}</a>: DUE {{ week.wednesday.date }}</li>
-                                {% else %}
-                                    <li>{{ hw_name }}: DUE {{ week.wednesday.date }}</li>
-                                {% endif %}
-                            {% endif %}
-                            {% if "friday" in week and week.friday.due %}
-                                {% set hw_name = week.friday.due.replace("HW", "HOMEWORK ") %}
-                                {% set hw_name_key = week.friday.due.replace("HW", "Homework ") %}
-                                {% if homework_urls and hw_name_key in homework_urls %}
-                                    <li><a href="{{ homework_urls[hw_name_key] }}" target="_blank">{{ hw_name }}</a>: DUE {{ week.friday.date }}</li>
-                                {% else %}
-                                    <li>{{ hw_name }}: DUE {{ week.friday.date }}</li>
-                                {% endif %}
-                            {% endif %}
+                        {% endfor %}
 
-                            <!-- ASSIGNED HW -->
-                            {% if "monday" in week and week.monday.assigned %}
-                                {% set hw_name = week.monday.assigned.replace("HW", "HOMEWORK ") %}
-                                {% set hw_name_key = week.monday.assigned.replace("HW", "Homework ") %}
-                                {% if homework_urls and hw_name_key in homework_urls %}
-                                    <li><a href="{{ homework_urls[hw_name_key] }}" target="_blank">{{ hw_name }}</a>: OPENS {{ week.monday.date }}</li>
-                                {% else %}
-                                    <li>{{ hw_name }}: OPENS {{ week.monday.date }}</li>
-                                {% endif %}
+                        <!-- HOMEWORK ASSIGNMENTS OPENING THIS WEEK -->
+                        {% for hw in homework_opening_this_week %}
+                            {% if homework_urls and hw.homework_key in homework_urls %}
+                                <p style="text-align: center;"><span style="font-size: 14pt;"><span style="color: #000000;"><a href="{{ homework_urls[hw.homework_key] }}">HOMEWORK {{ hw.homework_number }}</a>: OPENS {{ hw.assigned_date }}, </span><span style="color: #6b0707;">DUE {{ hw.due_date }}</span></span></p>
+                            {% else %}
+                                <p style="text-align: center;"><span style="font-size: 14pt;"><span style="color: #000000;">HOMEWORK {{ hw.homework_number }}: OPENS {{ hw.assigned_date }}, </span><span style="color: #6b0707;">DUE {{ hw.due_date }}</span></span></p>
                             {% endif %}
-                            {% if "wednesday" in week and week.wednesday.assigned %}
-                                {% set hw_name = week.wednesday.assigned.replace("HW", "HOMEWORK ") %}
-                                {% set hw_name_key = week.wednesday.assigned.replace("HW", "Homework ") %}
-                                {% if homework_urls and hw_name_key in homework_urls %}
-                                    <li><a href="{{ homework_urls[hw_name_key] }}" target="_blank">{{ hw_name }}</a>: OPENS {{ week.wednesday.date }}</li>
-                                {% else %}
-                                    <li>{{ hw_name }}: OPENS {{ week.wednesday.date }}</li>
-                                {% endif %}
-                            {% endif %}
-                            {% if "friday" in week and week.friday.assigned %}
-                                {% set hw_name = week.friday.assigned.replace("HW", "HOMEWORK ") %}
-                                {% set hw_name_key = week.friday.assigned.replace("HW", "Homework ") %}
-                                {% if homework_urls and hw_name_key in homework_urls %}
-                                    <li><a href="{{ homework_urls[hw_name_key] }}" target="_blank">{{ hw_name }}</a>: OPENS {{ week.friday.date }}</li>
-                                {% else %}
-                                    <li>{{ hw_name }}: OPENS {{ week.friday.date }}</li>
-                                {% endif %}
-                            {% endif %}
+                        {% endfor %}
 
-                            <!-- UPCOMING QUIZ -->
-                            {% if next_quiz %}
-                                {% set quiz_name = "Quiz " + next_quiz.quiz_number|string %}
-                                {% if quiz_urls and quiz_name in quiz_urls %}
-                                    <li><a href="{{ quiz_urls[quiz_name] }}" target="_blank">{{ quiz_name }}</a>: {{ next_quiz.date }}</li>
-                                {% else %}
-                                    <li>{{ quiz_name }}: {{ next_quiz.date }}</li>
-                                {% endif %}
+                        <!-- UPCOMING CHECKOUT -->
+                        {% if next_checkout %}
+                            {% set checkout_name = "Checkout" + next_checkout.checkout_number|string %}
+                            {% if checkout_urls and checkout_name in checkout_urls %}
+                                <p style="text-align: center;"><span style="font-size: 14pt;"><span style="color: #000000;"><a href="{{ checkout_urls[checkout_name] }}">CHECKOUT {{ next_checkout.checkout_number }}</a>: </span><span style="color: #6b0707;">{{ next_checkout.date }}</span></span></p>
+                            {% else %}
+                                <p style="text-align: center;"><span style="font-size: 14pt;"><span style="color: #000000;">CHECKOUT {{ next_checkout.checkout_number }}: </span><span style="color: #6b0707;">{{ next_checkout.date }}</span></span></p>
                             {% endif %}
-                        </ul>
+                        {% endif %}
+
+                        <!-- UPCOMING QUIZ -->
+                        {% if next_quiz %}
+                            {% set quiz_name = "Quiz" + next_quiz.quiz_number|string %}
+                            {% if quiz_urls and quiz_name in quiz_urls %}
+                                <p style="text-align: center;"><span style="font-size: 14pt;"><span style="color: #000000;"><a href="{{ quiz_urls[quiz_name] }}">QUIZ {{ next_quiz.quiz_number }}</a>: </span><span style="color: #6b0707;">{{ next_quiz.date }}</span></span></p>
+                            {% else %}
+                                <p style="text-align: center;"><span style="font-size: 14pt;"><span style="color: #000000;">QUIZ {{ next_quiz.quiz_number }}: </span><span style="color: #6b0707;">{{ next_quiz.date }}</span></span></p>
+                            {% endif %}
+                        {% endif %}
                         </div>
                 </div>
             </div>
@@ -182,11 +149,11 @@
             <div style="background-color: #efeff8; padding-left: 15px; border-radius: 10px; min-width: 75%; margin: auto;">
                 <h3 style="text-align: center;">Additional Example Problems</h3>
             </div>
-            <p>If you're looking for additional example problems to illustrate these learning objectives or to study from, check out the <a href="https://umich.instructure.com/courses/{{ course_id }}/pages/additional-example-problems-module-{{ week.module }}" target="_blank">additional example problems page for module {{ week.module }}</a>.</p>
+            <p>If you're looking for additional example problems to illustrate these learning objectives or to study from, check out the <a href="https://umich.instructure.com/courses/{{ course_id }}/pages/additional-example-problems-module-{{ week.module }}">additional example problems page for module {{ week.module }}</a>.</p>
         </div>
         <div class="col-md-5 col-sm-12 col-xs-12">
             <figure style="text-align: center; border: 1px solid black; padding: 10px;">
-                <img src="{{ week.image.image_path }}" style="max-width: 100%; height: auto;" alt="Module diagram">
+                <img src="{{ week.image.image_path }}" style="width: 320px; height: auto;" alt="Module diagram">
                 <figcaption>{{ week.image.caption }}</figcaption>
             </figure>
         </div>
@@ -202,24 +169,64 @@
             <div class="col-sm-12 col-md-12 col-lg-4">
                 <div class="styleguide-section__grid-demo-element">
                     <div style="background-color: #c3ddd6; padding-left: 15px;">
-                        <h2 style="text-align: center;"><span style="color: #000000;">Monday</span></h2>
+                        {% if "monday" in week and week.monday.topic and "No Class" in week.monday.topic %}
+                            <h2 style="text-align: center;"><span style="color: #000000;">Monday - NO CLASS</span></h2>
+                        {% else %}
+                            <h2 style="text-align: center;"><span style="color: #000000;">Monday</span></h2>
+                        {% endif %}
                         {% if "monday" in week and week.monday.date %}
                             <h2 style="text-align: center;"><span style="color: #000000;">{{ week.monday.date }}</span></h2>
                         {% endif %}
                     </div>
                     <h3>Before Class</h3>
+                    {% if "monday" in week and week.monday.topic and "No Class" in week.monday.topic %}
+                    <h4>Prework</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <ul>
+                        <li>Enjoy your time off!</li>
+                    </ul>
+                    {% else %}
+                    {% set is_checkout = ("monday" in week and week.monday.checkout_info and week.monday.checkout_info.has_checkout) %}
+                    {% if is_checkout %}
+                    <h4>Prework</h4>
+                    <ul>
+                        {% set co_name = "Checkout" + week.monday.checkout_info.checkout_number %}
+                        {% if checkout_urls and co_name in checkout_urls %}
+                            <li>Be prepared with your group for the in-class <a href="{{ checkout_urls[co_name] }}">checkout session</a></li>
+                        {% else %}
+                            <li>Be prepared with your group for the in-class checkout session</li>
+                        {% endif %}
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <ul>
+                        <li>Checkout session so no notes or video will be posted here</li>
+                    </ul>
+                    {% else %}
                     <h4>Prework</h4>
                     <ul>
                         {% if "monday" in week and week.monday.quiz_info and week.monday.quiz_info.has_quiz %}
-                            {% set quiz_name = "Quiz " + week.monday.quiz_info.quiz_number %}
+                            {% set quiz_name = "Quiz" + week.monday.quiz_info.quiz_number %}
                             {% if quiz_urls and quiz_name in quiz_urls %}
-                                <li><a href="{{ quiz_urls[quiz_name] }}" target="_blank">{{ week.monday.quiz_info.study_text }}</a></li>
+                                <li><a href="{{ quiz_urls[quiz_name] }}">{{ week.monday.quiz_info.study_text }}</a></li>
                             {% else %}
                                 <li>{{ week.monday.quiz_info.study_text }}</li>
                             {% endif %}
                             <li>
                                 {% if week.monday.quiz_info.sample_quiz_url %}
-                                    <a href="{{ week.monday.quiz_info.sample_quiz_url }}" target="_blank">{{ week.monday.quiz_info.sample_text }}</a>
+                                    <a href="{{ week.monday.quiz_info.sample_quiz_url }}">{{ week.monday.quiz_info.sample_text }}</a>
                                 {% else %}
                                     {{ week.monday.quiz_info.sample_text }}
                                 {% endif %}
@@ -228,7 +235,7 @@
                         {% if "monday" in week and week.monday.prework_video_title and week.monday.prework_video_title.strip() %}
                             {% set title_parts = week.monday.prework_video_title.split(' - ', 1) %}
                             {% set display_title = 'Prework ' + week.monday.lesson + ' - ' + title_parts[1] %}
-                            <li>Video: <a href="{{ week.monday.prework_video_link }}" target="_blank">{{ display_title }}</a></li>
+                            <li>Video: <a href="{{ week.monday.prework_video_link }}">{{ display_title }}</a></li>
                         {% endif %}
                         <li>Be ready to ask questions and talk with your classmates about the prework content!</li>
                     </ul>
@@ -246,29 +253,71 @@
                         <li>Class Notes: TO BE POSTED</li>
                         <li>Class Recording: TO BE POSTED</li>
                     </ul>
+                    {% endif %}
+                    {% endif %}
                 </div>
             </div>
             <div class="col-sm-12 col-md-12 col-lg-4">
                 <div class="styleguide-section__grid-demo-element">
                     <div style="background-color: #f6cac9; padding-left: 15px;">
-                        <h2 style="text-align: center;"><span style="color: #000000;">Wednesday</span></h2>
+                        {% if "wednesday" in week and week.wednesday.topic and "No Class" in week.wednesday.topic %}
+                            <h2 style="text-align: center;"><span style="color: #000000;">Wednesday - NO CLASS</span></h2>
+                        {% else %}
+                            <h2 style="text-align: center;"><span style="color: #000000;">Wednesday</span></h2>
+                        {% endif %}
                         {% if "wednesday" in week and week.wednesday.date %}
                             <h2 style="text-align: center;"><span style="color: #000000;">{{ week.wednesday.date }}</span></h2>
                         {% endif %}
                     </div>
                     <h3>Before Class</h3>
+                    {% if "wednesday" in week and week.wednesday.topic and "No Class" in week.wednesday.topic %}
+                    <h4>Prework</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <ul>
+                        <li>Enjoy your time off!</li>
+                    </ul>
+                    {% else %}
+                    {% set is_checkout = ("wednesday" in week and week.wednesday.checkout_info and week.wednesday.checkout_info.has_checkout) %}
+                    {% if is_checkout %}
+                    <h4>Prework</h4>
+                    <ul>
+                        {% set co_name = "Checkout" + week.wednesday.checkout_info.checkout_number %}
+                        {% if checkout_urls and co_name in checkout_urls %}
+                            <li>Be prepared with your group for the in-class <a href="{{ checkout_urls[co_name] }}">checkout session</a></li>
+                        {% else %}
+                            <li>Be prepared with your group for the in-class checkout session</li>
+                        {% endif %}
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <ul>
+                        <li>Checkout session so no notes or video will be posted here</li>
+                    </ul>
+                    {% else %}
                     <h4>Prework</h4>
                     <ul>
                         {% if "wednesday" in week and week.wednesday.quiz_info and week.wednesday.quiz_info.has_quiz %}
-                            {% set quiz_name = "Quiz " + week.wednesday.quiz_info.quiz_number %}
+                            {% set quiz_name = "Quiz" + week.wednesday.quiz_info.quiz_number %}
                             {% if quiz_urls and quiz_name in quiz_urls %}
-                                <li><a href="{{ quiz_urls[quiz_name] }}" target="_blank">{{ week.wednesday.quiz_info.study_text }}</a></li>
+                                <li><a href="{{ quiz_urls[quiz_name] }}">{{ week.wednesday.quiz_info.study_text }}</a></li>
                             {% else %}
                                 <li>{{ week.wednesday.quiz_info.study_text }}</li>
                             {% endif %}
                             <li>
                                 {% if week.wednesday.quiz_info.sample_quiz_url %}
-                                    <a href="{{ week.wednesday.quiz_info.sample_quiz_url }}" target="_blank">{{ week.wednesday.quiz_info.sample_text }}</a>
+                                    <a href="{{ week.wednesday.quiz_info.sample_quiz_url }}">{{ week.wednesday.quiz_info.sample_text }}</a>
                                 {% else %}
                                     {{ week.wednesday.quiz_info.sample_text }}
                                 {% endif %}
@@ -277,7 +326,7 @@
                         {% if "wednesday" in week and week.wednesday.prework_video_title and week.wednesday.prework_video_title.strip() %}
                             {% set title_parts = week.wednesday.prework_video_title.split(' - ', 1) %}
                             {% set display_title = 'Prework ' + week.wednesday.lesson + ' - ' + title_parts[1] %}
-                            <li>Video: <a href="{{ week.wednesday.prework_video_link }}" target="_blank">{{ display_title }}</a></li>
+                            <li>Video: <a href="{{ week.wednesday.prework_video_link }}">{{ display_title }}</a></li>
                         {% endif %}
                         <li>Be ready to ask questions and talk with your classmates about the prework content!</li>
                     </ul>
@@ -295,29 +344,71 @@
                         <li>Class Notes: TO BE POSTED</li>
                         <li>Class Recording: TO BE POSTED</li>
                     </ul>
+                    {% endif %}
+                    {% endif %}
                 </div>
             </div>
             <div class="col-sm-12 col-md-12 col-lg-4">
                 <div class="styleguide-section__grid-demo-element">
                     <div style="background-color: #d1c3d5; padding-left: 15px;">
-                        <h2 style="text-align: center;"><span style="color: #000000;">Friday</span></h2>
+                        {% if "friday" in week and week.friday.topic and "No Class" in week.friday.topic %}
+                            <h2 style="text-align: center;"><span style="color: #000000;">Friday - NO CLASS</span></h2>
+                        {% else %}
+                            <h2 style="text-align: center;"><span style="color: #000000;">Friday</span></h2>
+                        {% endif %}
                         {% if "friday" in week and week.friday.date %}
                             <h2 style="text-align: center;"><span style="color: #000000;">{{ week.friday.date }}</span></h2>
                         {% endif %}
                     </div>
                     <h3>Before Class</h3>
+                    {% if "friday" in week and week.friday.topic and "No Class" in week.friday.topic %}
+                    <h4>Prework</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <ul>
+                        <li>Enjoy your time off!</li>
+                    </ul>
+                    {% else %}
+                    {% set is_checkout = ("friday" in week and week.friday.checkout_info and week.friday.checkout_info.has_checkout) %}
+                    {% if is_checkout %}
+                    <h4>Prework</h4>
+                    <ul>
+                        {% set co_name = "Checkout" + week.friday.checkout_info.checkout_number %}
+                        {% if checkout_urls and co_name in checkout_urls %}
+                            <li>Be prepared with your group for the in-class <a href="{{ checkout_urls[co_name] }}">checkout session</a></li>
+                        {% else %}
+                            <li>Be prepared with your group for the in-class checkout session</li>
+                        {% endif %}
+                    </ul>
+                    <h4>Referenced Reading</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+                    <hr />
+                    <h3>During Class</h3>
+                    <ul>
+                        <li>Checkout session so no notes or video will be posted here</li>
+                    </ul>
+                    {% else %}
                     <h4>Prework</h4>
                     <ul>
                         {% if "friday" in week and week.friday.quiz_info and week.friday.quiz_info.has_quiz %}
-                            {% set quiz_name = "Quiz " + week.friday.quiz_info.quiz_number %}
+                            {% set quiz_name = "Quiz" + week.friday.quiz_info.quiz_number %}
                             {% if quiz_urls and quiz_name in quiz_urls %}
-                                <li><a href="{{ quiz_urls[quiz_name] }}" target="_blank">{{ week.friday.quiz_info.study_text }}</a></li>
+                                <li><a href="{{ quiz_urls[quiz_name] }}">{{ week.friday.quiz_info.study_text }}</a></li>
                             {% else %}
                                 <li>{{ week.friday.quiz_info.study_text }}</li>
                             {% endif %}
                             <li>
                                 {% if week.friday.quiz_info.sample_quiz_url %}
-                                    <a href="{{ week.friday.quiz_info.sample_quiz_url }}" target="_blank">{{ week.friday.quiz_info.sample_text }}</a>
+                                    <a href="{{ week.friday.quiz_info.sample_quiz_url }}">{{ week.friday.quiz_info.sample_text }}</a>
                                 {% else %}
                                     {{ week.friday.quiz_info.sample_text }}
                                 {% endif %}
@@ -326,7 +417,7 @@
                         {% if "friday" in week and week.friday.prework_video_title and week.friday.prework_video_title.strip() %}
                             {% set title_parts = week.friday.prework_video_title.split(' - ', 1) %}
                             {% set display_title = 'Prework ' + week.friday.lesson + ' - ' + title_parts[1] %}
-                            <li>Video: <a href="{{ week.friday.prework_video_link }}" target="_blank">{{ display_title }}</a></li>
+                            <li>Video: <a href="{{ week.friday.prework_video_link }}">{{ display_title }}</a></li>
                         {% endif %}
                         <li>Be ready to ask questions and talk with your classmates about the prework content!</li>
                     </ul>
@@ -344,6 +435,8 @@
                         <li>Class Notes: TO BE POSTED</li>
                         <li>Class Recording: TO BE POSTED</li>
                     </ul>
+                    {% endif %}
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -357,16 +450,33 @@
             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                 <div class="styleguide-section__grid-demo-element">
                     <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #000000; font-family: inherit; font-size: 1rem;">Lecture time and location:</span></div>
-                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #000000;">Monday, Wednesday, &amp; Friday 11:30 AM - 1:00 PM</span></div>
-                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #000000;">3460 Central Campus Classroom Building (CCCB)</span></div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #000000;">{{ lecture_info.lecture_days }} {{ lecture_info.lecture_time }}</span></div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #000000;">{{ lecture_info.lecture_location }}</span></div>
                     <p>&nbsp;</p>
                 </div>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                 <div class="styleguide-section__grid-demo-element">
-                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #2c333e; font-family: inherit; font-size: 1rem;">Full Schedule Calendar (PDF) / <a href="https://umich.instructure.com/courses/{{ course_id }}/modules" target="_blank" rel="noopener" style="color: #2c333e;">Canvas Modules</a></span></div>
-                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span class="textLayer--absolute" style="font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Course Syllabus (PDF)</span></div>
-                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;"><span style="color: #2c333e;"><span class="textLayer--absolute" style="font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Instructors and Office Hours</span></span></div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;">
+                        <span style="color: #2c333e; font-family: inherit; font-size: 1rem;">
+                            {% if pdf_urls.syllabus_schedule %}
+                                <a href="{{ pdf_urls.syllabus_schedule }}" rel="noopener" style="color: #2c333e;">Full Schedule Calendar (PDF)</a>
+                            {% else %}
+                                Full Schedule Calendar (PDF)
+                            {% endif %}
+                            / <a href="https://umich.instructure.com/courses/{{ course_id }}/wiki" rel="noopener" style="color: #2c333e;">Canvas Modules</a>
+                        </span>
+                    </div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;">
+                        {% if pdf_urls.syllabus %}
+                            <a href="{{ pdf_urls.syllabus }}" rel="noopener" style="color: #2c333e; font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Course Syllabus (PDF)</a>
+                        {% else %}
+                            <span class="textLayer--absolute" style="font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Course Syllabus (PDF)</span>
+                        {% endif %}
+                    </div>
+                    <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;">
+                        <a href="https://umich.instructure.com/courses/{{ course_id }}/pages/instructors-and-drop-in-hours-2" rel="noopener" style="color: #2c333e; font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Instructors and Office Hours</a>
+                    </div>
                     <p>&nbsp;</p>
                 </div>
             </div>

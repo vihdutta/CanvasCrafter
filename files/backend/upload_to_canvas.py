@@ -1,6 +1,7 @@
 import os
 import requests
 import re
+from files.backend.populate_weeks_utils import title_to_url_safe
 
 
 def upload_page(
@@ -21,12 +22,11 @@ def upload_page(
     # Canvas converts any non-alphanumeric characters in the provided page_url to hyphens.
     # Do that conversion ourselves so the slug we send *exactly* matches the one Canvas stores
     # (e.g. "Week 1" becomes "week-1"), preventing Canvas from appending a numeric suffix.
-    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    slug = title_to_url_safe(title)
     data = {
         "wiki_page[title]": title,
         "wiki_page[body]": html_content,
         "wiki_page[published]": True,
-        "on_duplicate": "overwrite",
     }
 
     # try updating the page

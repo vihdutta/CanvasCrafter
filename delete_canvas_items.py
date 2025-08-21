@@ -1,7 +1,6 @@
 import os
 import re
 import requests
-import sys
 from typing import List, Dict, Tuple
 from dotenv import load_dotenv
 
@@ -89,7 +88,7 @@ class CanvasDeleter:
 
     def filter_assignments_to_delete(self, assignments: List[Dict]) -> List[Dict]:
         """
-        Filter assignments that match the deletion criteria: "Checkout#", "Quiz #", and "HW##"
+        Filter assignments that match the deletion criteria: "Checkout#", "Quiz#", and "HW##"
 
         Args:
             assignments: List of all assignments from Canvas
@@ -99,9 +98,9 @@ class CanvasDeleter:
         """
         assignments_to_delete = []
 
-        # Patterns to match: "Checkout#", "Quiz #", and "HW##"
+        # Patterns to match: "Checkout#", "Quiz#", and "HW##"
         checkout_pattern = re.compile(r"^Checkout\d+$", re.IGNORECASE)
-        quiz_pattern = re.compile(r"^Quiz\s+\d+$", re.IGNORECASE)
+        quiz_pattern = re.compile(r"^Quiz\s*\d+$", re.IGNORECASE)
         homework_pattern = re.compile(r"^HW\d{2}$", re.IGNORECASE)
 
         for assignment in assignments:
@@ -178,7 +177,7 @@ class CanvasDeleter:
         pages_to_delete = self.filter_pages_to_delete(all_pages)
         assignments_to_delete = self.filter_assignments_to_delete(all_assignments)
 
-        print(f"\n📋 Items matching deletion criteria:")
+        print("\n📋 Items matching deletion criteria:")
         print(f"  - Pages to delete: {len(pages_to_delete)}")
         print(f"  - Assignments to delete: {len(assignments_to_delete)}")
 
@@ -204,7 +203,7 @@ class CanvasDeleter:
             print("❌ Deletion cancelled.")
             return 0, 0
 
-        print(f"\n🗑️  Deleting items...")
+        print("\n🗑️  Deleting items...")
 
         pages_deleted = 0
         for page in pages_to_delete:
@@ -216,7 +215,7 @@ class CanvasDeleter:
             if self.delete_assignment(assignment):
                 assignments_deleted += 1
 
-        print(f"\n✅ Deletion complete!")
+        print("\n✅ Deletion complete!")
         print(f"  - Pages deleted: {pages_deleted}/{len(pages_to_delete)}")
         print(
             f"  - Assignments deleted: {assignments_deleted}/{len(assignments_to_delete)}"
@@ -243,7 +242,7 @@ def main():
     print("=" * 50)
     print("This script will delete Canvas items with these formats:")
     print("  - Pages: 'Week #' (and variations like 'Week #: Topic (Date)') and 'HW##'")
-    print("  - Assignments: 'Checkout#', 'Quiz #', and 'HW##'")
+    print("  - Assignments: 'Checkout#', 'Quiz#', and 'HW##'")
     print()
 
     course_id, access_token = get_credentials()

@@ -8,7 +8,7 @@
 </div>
 <ul>
     <li><span style="text-decoration: underline;"><strong>Date &amp; Time:</strong></span> {{ formatted_quiz_date }} during our normal class period (please try to arrive early so we can get started on time, you will be given the first 40 minutes of the class session to work on the quiz)</li>
-    <li><span style="text-decoration: underline;"><strong>Location:</strong></span> Our normal classroom, 3460 Central Campus Classroom Building. If you have SSD accommodations, you will be taking the assessment in XXX starting at our normal class start time (11:30 AM). A member of our instructional team will meet you there to get you started.</li>
+    <li><span style="text-decoration: underline;"><strong>Location:</strong></span> Our normal classroom, <span style="background-color: yellow;">{{ lecture_info.lecture_location }}</span>. If you have SSD accommodations, you will be taking the assessment in <span style="background-color: yellow;">XXX</span> starting at our normal class start time ({{ lecture_info.start_time_24h }} AM). A member of our instructional team will meet you there to get you started.</li>
     <li><span style="text-decoration: underline;"><strong>Materials You're Allowed to Bring for the Quiz:</strong></span> <span>You will only be allowed a writing utensil, eraser, and</span><span>&nbsp;a double</span><span>-sided, hand-written sheet of notes. You are allowed to include anything you want on this sheet of notes, but it must be handwritten (written with a tablet and then printed is fine) in your own handwriting and on a standard letter size piece of paper. No calculators or other electronics are allowed on the assessment.</span></li>
     <li><span><span style="text-decoration: underline;"><strong>Materials You're Supplied with for the Quiz:</strong></span> You will be supplied with scratch paper in case you find you do not have enough room to show your work on the quiz itself.</span></li>
     <li><span><strong><span style="text-decoration: underline;">Format:</span></strong> The quiz will consist of one problem with multiple subparts. We are more than happy to award partial credit on the quiz so please try to make an attempt and spell out your thought process for each problem.&nbsp; The grading rubric will always emphasize the process more heavily than the final answer.</span></li>
@@ -17,7 +17,7 @@
 <div style="background-color: #d5e0ec; padding-left: 15px;">
     <h2><span style="color: #000000;">Content</span></h2>
 </div>
-<p>This quiz will cover content presented in Module {{ module_number }} of the course. This includes Lessons {{ lesson_range }} and {{ homework_range }}. The learning objectives for this module that can be assessed in this quiz are as follows:</p>
+<p>This quiz will cover content presented in Module {{ module_number }} of the course. This includes Lessons <span style="background-color: yellow;">{{ lesson_range }}</span> and <span style="background-color: yellow;">{{ homework_range }}</span>. The learning objectives for this module that can be assessed in this quiz are as follows:</p>
 <h3>Module {{ module_number }} Learning Objectives: {{ learning_objectives_topic }}</h3>
 <ul>
     {% for objective in learning_objectives %}

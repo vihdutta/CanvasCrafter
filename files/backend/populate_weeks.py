@@ -2,13 +2,13 @@ from datetime import datetime
 import pandas as pd
 import yaml
 import numpy as np
-from typing import Optional, Dict
 
 # Import utility functions from the new utils module
 from files.backend.populate_weeks_utils import (
     title_to_url_safe,
     fetch_canvas_pages,
-    process_quiz_from_topic
+    process_quiz_from_topic,
+    process_checkout_from_topic,
 )
 from files.backend.get_image_urls import get_image_urls_for_yaml_data
 
@@ -20,7 +20,8 @@ def populate_weeks(
     objectives_path: str,
     images_path: str,
     course_id: str = None,
-    access_token: str = None
+    access_token: str = None,
+    lecture_info_path: str = "files/yaml/lecture_info.yaml"
 ):
     DATA_START_ROW = 1
     df = pd.read_excel(excel_schedule_path, engine="openpyxl")
@@ -28,7 +29,7 @@ def populate_weeks(
     df = df.replace(np.nan, "")
 
     overview_data, objective_data, images_data = read_overview_and_objective_yaml(overview_path, objectives_path, images_path)
-
+    lecture_info = load_lecture_info(lecture_info_path)
 
     image_urls, icon_urls = get_image_urls_for_yaml_data(images_data, course_id, access_token)
 
@@ -71,11 +72,13 @@ def populate_weeks(
             weeks[weeks_column[index]][weekday]["date"] = formatted_date
             weeks[weeks_column[index]][weekday]["topic"] = row[6]
             weeks[weeks_column[index]][weekday]["referenced"] = row[7]
-            weeks[weeks_column[index]][weekday]["assigned"] = row[9]
-            weeks[weeks_column[index]][weekday]["due"] = row[10]
+            weeks[weeks_column[index]][weekday]["assigned"] = row[8]
+            weeks[weeks_column[index]][weekday]["due"] = row[9]
             
             quiz_info = process_quiz_from_topic(row[6], sample_quiz_urls)
             weeks[weeks_column[index]][weekday]["quiz_info"] = quiz_info
+            checkout_info = process_checkout_from_topic(row[6])
+            weeks[weeks_column[index]][weekday]["checkout_info"] = checkout_info
             
             prework_title_raw = str(row[11]).strip() if not pd.isna(row[11]) else ""
             if prework_title_raw and prework_title_raw != "":
@@ -83,8 +86,8 @@ def populate_weeks(
                 prework_title_with_prefix = f"Prework Module {current_module} - {prework_title_raw}"
                 weeks[weeks_column[index]][weekday]["prework_video_title"] = prework_title_with_prefix
                 url_safe_title = title_to_url_safe(prework_title_with_prefix)
-                if url_safe_title:
-                    prework_link = f"https://umich.instructure.com/courses/801002/pages/{url_safe_title}"
+                if url_safe_title and course_id:
+                    prework_link = f"https://umich.instructure.com/courses/{course_id}/pages/{url_safe_title}"
                     weeks[weeks_column[index]][weekday]["prework_video_link"] = prework_link
                 else:
                     weeks[weeks_column[index]][weekday]["prework_video_link"] = ""
@@ -101,6 +104,9 @@ def populate_weeks(
 
     # Add icon URLs to the returned data structure
     weeks["icon_urls"] = icon_urls
+    
+    # Add lecture info to the returned data structure
+    weeks["lecture_info"] = lecture_info
     
     return weeks
 
@@ -123,6 +129,34 @@ def read_overview_and_objective_yaml(
     return (overview_data, objective_data, images_data)
 
 
+def load_lecture_info(lecture_info_path: str = "files/yaml/lecture_info.yaml"):
+    """Load lecture information from YAML file."""
+    with open(lecture_info_path, "r", encoding="utf-8") as f:
+        lecture_info = yaml.safe_load(f)
+    return lecture_info
+
+
+def get_lecture_days_list(lecture_info_path: str = "files/yaml/lecture_info.yaml"):
+    """
+    Get list of lecture days in lowercase from YAML file.
+    Default: ['monday', 'wednesday', 'friday']
+    """
+    try:
+        lecture_info = load_lecture_info(lecture_info_path)
+        days_string = lecture_info.get("lecture_days", "Monday, Wednesday, & Friday")
+        
+        # Parse the days string to extract individual days
+        # Remove common separators and convert to lowercase
+        days_string = days_string.replace("&", ",").replace(" and ", ",")
+        days = [day.strip().lower() for day in days_string.split(",") if day.strip()]
+        
+        return days
+    except Exception as e:
+        print(f"Warning: Could not load lecture days from {lecture_info_path}: {e}")
+        # Default fallback
+        return ["monday", "wednesday", "friday"]
+
+
 if __name__ == "__main__":
     excel_schedule_path = "files/yaml/schedule.xlsx"
     overview_path = "files/yaml/overview_statements.yaml"
@@ -135,6 +169,7 @@ if __name__ == "__main__":
         objectives_path=objectives_path,
         images_path=images_path,
         course_id=None,  # Canvas credentials not available in direct script run
-        access_token=None
+        access_token=None,
+        lecture_info_path="files/yaml/lecture_info.yaml"
     )
     print(weekly_page_data)

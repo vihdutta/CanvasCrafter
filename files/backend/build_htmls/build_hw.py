@@ -5,10 +5,11 @@ from datetime import datetime
 from typing import Dict, List
 from jinja2 import Environment, FileSystemLoader
 from files.backend.populate_weeks import populate_weeks
+from files.backend.homework_utils import get_all_homework_pdf_links, extract_homework_numbers_from_weeks_data
 
 
 def build_homework_html(
-    weeks_data: Dict, unique_identifier: str = "hw", course_id: str | None = None
+    weeks_data: Dict, unique_identifier: str = "hw", course_id: str | None = None, access_token: str | None = None
 ) -> List[str]:
     template_dir = os.path.join(
         os.path.dirname(__file__), "..", "..", "..", "templates"
@@ -26,6 +27,13 @@ def build_homework_html(
     template = env.get_template("homework_template.html")
 
     homework_files = []
+
+    # Get all homework PDF links if Canvas credentials are available
+    homework_pdf_links = {}
+    if course_id and access_token:
+        homework_numbers = extract_homework_numbers_from_weeks_data(weeks_data)
+        homework_pdf_links = get_all_homework_pdf_links(course_id, access_token, homework_numbers)
+        print(f"Fetched PDF links for {len(homework_pdf_links)} homework assignments")
 
     # Process each week to find homework assignments
     for week_num, week_data in weeks_data.items():
@@ -70,6 +78,15 @@ def build_homework_html(
 
         # Generate HTML for each homework assignment found in this week
         for hw in homework_assignments:
+            # Get PDF links for this homework assignment
+            hw_key = f"HW{int(hw['number']):02d}"
+            homework_pdf_url = ""
+            solution_pdf_url = ""
+            
+            if hw_key in homework_pdf_links:
+                homework_pdf_url = homework_pdf_links[hw_key].get("homework_pdf", "")
+                solution_pdf_url = homework_pdf_links[hw_key].get("solution_pdf", "")
+            
             html = template.render(
                 homework_number=hw["number"],
                 assigned_date=hw["assigned_date"],
@@ -78,6 +95,8 @@ def build_homework_html(
                 learning_objectives=hw["learning_objectives"],
                 learning_objectives_topic=hw["learning_objectives_topic"],
                 course_id=course_id,
+                homework_pdf_url=homework_pdf_url,
+                solution_pdf_url=solution_pdf_url,
             )
 
             # Write HTML file
@@ -188,7 +207,7 @@ def upload_homework_assignment(
             try:
                 error_detail = e.response.json()
                 error_msg = f"Canvas API error: {error_detail}"
-            except:
+            except Exception:
                 error_msg = (
                     f"Canvas API error: {e.response.status_code} - {e.response.text}"
                 )
@@ -214,8 +233,9 @@ if __name__ == "__main__":
         objectives_path=objectives_path,
         images_path=images_path,
         course_id=None,  # Canvas credentials not available in direct script run
-        access_token=None
+        access_token=None,
+        lecture_info_path="files/yaml/lecture_info.yaml"
     )
 
-    homework_files = build_homework_html(weekly_page_data)
+    homework_files = build_homework_html(weekly_page_data, access_token=None)
     print(f"Generated homework files: {homework_files}")

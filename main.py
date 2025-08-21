@@ -47,7 +47,8 @@ async def api():
         "files/yaml/learning_objectives.yaml",
         "files/yaml/images.yaml",
         course_id=None,  # Canvas credentials not available in this endpoint
-        access_token=None
+        access_token=None,
+        lecture_info_path="files/yaml/lecture_info.yaml"
     )
     return {"message": weekly_page_data}
 
@@ -161,7 +162,7 @@ async def generate(path: str):
 
                 quiz_files.append(
                     {
-                        "name": f"Quiz {quiz_number}",
+                        "name": f"Quiz{quiz_number}",
                         "html": html_content,
                         "type": "quiz",
                         "quiz_number": quiz_number,
@@ -383,17 +384,28 @@ async def upload_to_canvas(
             try:
                 filename = os.path.basename(filepath)
                 quiz_number = filename.split("_")[1]
-                title = f"Quiz {quiz_number}"
+                title = f"Quiz{quiz_number}"
 
                 with open(filepath, "r", encoding="utf-8") as f:
                     html_content = f.read()
 
-                # Try to extract quiz date from HTML content if available
+                # Get the proper quiz date from weeks_data instead of parsing HTML
                 quiz_date = None
-                import re
-                date_match = re.search(r"(\d{1,2}/\d{1,2}/\d{4})", html_content)
-                if date_match:
-                    quiz_date = date_match.group(1)
+                if weeks_data:
+                    from files.backend.populate_weeks_utils import collect_quiz_dates
+                    all_quizzes = collect_quiz_dates(weeks_data)
+                    # Find the quiz with matching quiz_number
+                    for quiz in all_quizzes:
+                        if str(quiz["quiz_number"]) == quiz_number:
+                            quiz_date = quiz["date"]
+                            break
+                
+                # Fallback: try to extract quiz date from HTML content if not found in weeks_data
+                if not quiz_date:
+                    import re
+                    date_match = re.search(r"(\d{1,2}/\d{1,2}/\d{4})", html_content)
+                    if date_match:
+                        quiz_date = date_match.group(1)
 
                 result = upload_quiz_assignment(
                     title, html_content, course_id, access_token, quiz_date
@@ -546,7 +558,7 @@ async def upload_to_canvas(
             from files.backend.build_htmls.build_weekly_page import regenerate_weekly_pages_with_homework_urls
             
             updated_weekly_files = regenerate_weekly_pages_with_homework_urls(
-                temp_dir, homework_urls, course_id, quiz_urls
+                temp_dir, homework_urls, course_id, quiz_urls, checkout_urls, access_token
             )
             
         except Exception as e:

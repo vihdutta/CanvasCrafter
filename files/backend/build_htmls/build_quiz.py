@@ -84,6 +84,14 @@ def build_quiz_html(
             learning_objectives = []
             learning_objectives_topic = "General"
         
+        # Load lecture info for the template
+        try:
+            from files.backend.populate_weeks import load_lecture_info
+            lecture_info = load_lecture_info()
+        except Exception as e:
+            print(f"Warning: Could not load lecture info: {e}")
+            lecture_info = {}
+        
         html = template.render(
             quiz_number=quiz["quiz_number"],
             quiz_date=quiz["date"],
@@ -96,6 +104,7 @@ def build_quiz_html(
             learning_objectives_topic=learning_objectives_topic,
             sample_quiz_url=quiz_info.get("sample_quiz_url", ""),
             course_id=course_id,
+            lecture_info=lecture_info,
         )
 
         # Write HTML file
@@ -135,12 +144,23 @@ def upload_quiz_assignment(
         due_at = None
         if quiz_date:
             try:
+                # Load lecture info to get the correct start time
+                from files.backend.populate_weeks import load_lecture_info
+                lecture_info = load_lecture_info()
+                start_hour = lecture_info.get("start_hour", 11)
+                start_minute = lecture_info.get("start_minute", 30)
+                
                 # Parse MM/DD/YYYY format and convert to ISO 8601
                 parsed_date = datetime.strptime(quiz_date, "%m/%d/%Y")
-                # Set due time to the beginning of class (11:30 AM)
-                due_at = parsed_date.replace(hour=11, minute=30, second=0).isoformat()
+                # Set due time to the beginning of class
+                due_at = parsed_date.replace(hour=start_hour, minute=start_minute, second=0).isoformat()
             except ValueError:
                 print(f"Warning: Could not parse quiz date '{quiz_date}', skipping due date")
+            except Exception as e:
+                print(f"Warning: Could not load lecture info for quiz due time: {e}")
+                # Fallback to hardcoded time
+                parsed_date = datetime.strptime(quiz_date, "%m/%d/%Y")
+                due_at = parsed_date.replace(hour=11, minute=30, second=0).isoformat()
 
         # Prepare assignment data for quiz (same structure as homework)
         assignment_data = {
@@ -209,7 +229,8 @@ if __name__ == "__main__":
         objectives_path=objectives_path,
         images_path=images_path,
         course_id=None,  # Canvas credentials not available in direct script run
-        access_token=None
+        access_token=None,
+        lecture_info_path="files/yaml/lecture_info.yaml"
     )
 
     quiz_files = build_quiz_html(weekly_page_data)
