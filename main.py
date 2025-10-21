@@ -465,12 +465,12 @@ async def upload_to_canvas(
                 )
         
         # STEP 3: Upload checkout assignments THIRD (after homework and quiz, since they reference homework)
-        # First, regenerate checkout HTML with homework URLs for proper linking
+        # first, regenerate checkout HTML with homework URLs for proper linking
         if weeks_data and homework_urls:
             try:
                 from files.backend.build_htmls.build_checkout import build_checkout_html
                 updated_checkout_files = build_checkout_html(weeks_data, file_group_identifier, course_id, homework_urls)
-                # Update the checkout_files list to use the regenerated files
+                # update the checkout_files list to use the regenerated files
                 checkout_files = updated_checkout_files
             except Exception as e:
                 print(f"Warning: Could not regenerate checkout files with homework URLs: {e}")

@@ -7,6 +7,11 @@ env/
 .vscode/
 *.log
 .venv
-uploads
-temp
 files/images
+
+# Include the folders but ignore their contents
+uploads/*
+!uploads/.gitkeep
+
+temp/*
+!temp/.gitkeep
