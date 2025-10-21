@@ -28,7 +28,7 @@ In the terminal, run this command (make sure you have `git` installed. if not, f
 
 After downloading the files and extracting them, you must create two folders in the directory called `uploads` and `temp` respectively. These folders should be at the same level as the `files`, `resources`, `templates`, etc. folders. 
 
-Open a terminal window in the same directory as the folder. You will be running the following commands in them (this will require installing Python version 3.13 (other versions may work, but this is the one I used) which can be found here `https://www.python.org/downloads/`):
+Open a terminal window in the same directory as the folder (this can be done by opening the terminal in File Explorer, right clicking, and pressing "Open In Terminal"). You will be running the following commands in them (this will require installing Python version 3.13 (other versions may work, but this is the one I used) which can be found here `https://www.python.org/downloads/`):
 
 Run this command in that terminal window to install dependencies for the Python project.
 
