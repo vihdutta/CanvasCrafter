@@ -162,15 +162,14 @@ def upload_quiz_assignment(
                 parsed_date = datetime.strptime(quiz_date, "%m/%d/%Y")
                 due_at = parsed_date.replace(hour=11, minute=30, second=0).isoformat()
 
-        # Prepare assignment data for quiz (same structure as homework)
+        # Prepare assignment data for quiz (no submission required)
         assignment_data = {
             "assignment[name]": title,
             "assignment[description]": html_content,
-            "assignment[submission_types][]": "online_upload",  # Same as homework
+            "assignment[submission_types][]": "none",  # No submission required
             "assignment[points_possible]": 25,  # Standard quiz points
             "assignment[grading_type]": "points",
             "assignment[published]": True,  # Published like homework
-            "assignment[allowed_extensions][]": "pdf",  # Same as homework
         }
 
         if due_at:

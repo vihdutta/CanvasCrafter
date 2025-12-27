@@ -6,11 +6,11 @@ import numpy as np
 # Import utility functions from the new utils module
 from files.backend.populate_weeks_utils import (
     title_to_url_safe,
-    fetch_canvas_pages,
     process_quiz_from_topic,
     process_checkout_from_topic,
 )
 from files.backend.get_image_urls import get_image_urls_for_yaml_data
+from files.backend.quiz_utils import fetch_all_sample_quiz_folder_urls
 
 
 # populates the Week objects from the yaml and excel schedule files
@@ -35,9 +35,9 @@ def populate_weeks(
 
     sample_quiz_urls = {}
     if course_id and access_token:
-        print("Fetching sample quiz pages from Canvas...")
-        sample_quiz_urls = fetch_canvas_pages(course_id, access_token)
-        print(f"Found {len(sample_quiz_urls)} sample quiz pages")
+        print("Fetching sample quiz folder URLs from Canvas...")
+        sample_quiz_urls = fetch_all_sample_quiz_folder_urls(course_id, access_token)
+        print(f"Found {len(sample_quiz_urls)} sample quiz folder URLs")
 
     weeks = {}
     for w in set(weeks_column):
