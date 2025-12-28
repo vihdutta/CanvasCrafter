@@ -3,6 +3,7 @@ import re
 import requests
 from typing import List, Dict, Tuple
 from dotenv import load_dotenv
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 load_dotenv()
 
@@ -164,7 +165,16 @@ class CanvasDeleter:
             print(f"✗ Failed to delete assignment '{name}': {e}")
             return False
 
-    def delete_all_matching_items(self) -> Tuple[int, int]:
+    def delete_all_matching_items(self, max_workers: int = 10) -> Tuple[int, int]:
+        """
+        Delete all matching items using parallel requests.
+        
+        Args:
+            max_workers: Maximum number of parallel workers (default: 10)
+            
+        Returns:
+            Tuple of (pages_deleted, assignments_deleted)
+        """
         print("🔍 Fetching Canvas items...")
 
         all_pages = self.get_all_pages()
@@ -203,17 +213,36 @@ class CanvasDeleter:
             print("❌ Deletion cancelled.")
             return 0, 0
 
-        print("\n🗑️  Deleting items...")
+        print(f"\n🗑️  Deleting items (using {max_workers} parallel workers)...")
 
         pages_deleted = 0
-        for page in pages_to_delete:
-            if self.delete_page(page):
-                pages_deleted += 1
-
         assignments_deleted = 0
-        for assignment in assignments_to_delete:
-            if self.delete_assignment(assignment):
-                assignments_deleted += 1
+
+        # Delete pages in parallel
+        if pages_to_delete:
+            print(f"\nDeleting {len(pages_to_delete)} pages...")
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                future_to_page = {
+                    executor.submit(self.delete_page, page): page 
+                    for page in pages_to_delete
+                }
+                
+                for future in as_completed(future_to_page):
+                    if future.result():
+                        pages_deleted += 1
+
+        # Delete assignments in parallel
+        if assignments_to_delete:
+            print(f"\nDeleting {len(assignments_to_delete)} assignments...")
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                future_to_assignment = {
+                    executor.submit(self.delete_assignment, assignment): assignment
+                    for assignment in assignments_to_delete
+                }
+                
+                for future in as_completed(future_to_assignment):
+                    if future.result():
+                        assignments_deleted += 1
 
         print("\n✅ Deletion complete!")
         print(f"  - Pages deleted: {pages_deleted}/{len(pages_to_delete)}")
