@@ -16,6 +16,8 @@ from files.backend.populate_weeks_utils import (
     title_to_url_safe,
     collect_homework_assignments_opening_during_week,
     collect_homework_assignments_due_during_week,
+    get_week_days_in_order,
+    get_day_color,
 )
 
 
@@ -113,6 +115,12 @@ def build_html(
             weeks_data, int(key)
         )
 
+        # Get the days present in this week (dynamically from spreadsheet data)
+        week_days = get_week_days_in_order(curr_week)
+        # Add color to each day based on its position
+        for idx, day in enumerate(week_days):
+            day["color"] = get_day_color(idx)
+
         html = template.render(
             week=curr_week,
             week_number=display_week_num,
@@ -129,6 +137,7 @@ def build_html(
             icon_urls=weeks_data.get("icon_urls", {}),  # Add icon URLs
             lecture_info=weeks_data.get("lecture_info", {}),  # Add lecture info
             pdf_urls=pdf_urls,  # Add PDF URLs for course information
+            week_days=week_days,  # Dynamic days from spreadsheet
         )
 
         # write each HTML file to the unique output subdirectory

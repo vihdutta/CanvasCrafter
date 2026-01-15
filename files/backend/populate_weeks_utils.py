@@ -570,3 +570,88 @@ def find_homework_assigned_date_across_weeks(weeks_data: Dict, hw_number: str) -
                     return week_data[day]["date"]
 
     return "TBD"
+
+
+def get_week_days_in_order(week_data: Dict) -> List[Dict]:
+    """
+    Extract the days present in a week's data, sorted by date.
+    Returns a list of dicts with 'day_name', 'display_name', 'date', and all day data.
+    
+    Args:
+        week_data: Dictionary containing a single week's data
+        
+    Returns:
+        List of day dictionaries sorted by date, each containing:
+        - day_name: lowercase day name (e.g., 'monday')
+        - display_name: capitalized day name (e.g., 'Monday')
+        - date: the formatted date string
+        - data: the full day data dictionary
+    """
+    from datetime import datetime
+    
+    weekday_order = [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+    ]
+    
+    days_found = []
+    
+    for day_name in weekday_order:
+        if day_name in week_data and isinstance(week_data[day_name], dict):
+            day_data = week_data[day_name]
+            date_str = day_data.get("date", "")
+            
+            # Parse the date for sorting
+            date_obj = None
+            if date_str:
+                try:
+                    date_obj = datetime.strptime(date_str, "%m/%d/%Y")
+                except ValueError:
+                    pass
+            
+            days_found.append({
+                "day_name": day_name,
+                "display_name": day_name.capitalize(),
+                "date": date_str,
+                "date_obj": date_obj,
+                "data": day_data,
+            })
+    
+    # Sort by date object (None values go to end)
+    days_found.sort(key=lambda x: x["date_obj"] if x["date_obj"] else datetime.max)
+    
+    # Remove the date_obj from the output (it was only for sorting)
+    for day in days_found:
+        del day["date_obj"]
+    
+    return days_found
+
+
+# Color scheme for day columns (left to right)
+DAY_COLUMN_COLORS = [
+    "#c3ddd6",  # Teal/green - first column
+    "#f6cac9",  # Pink/red - second column
+    "#d1c3d5",  # Purple - third column
+    "#fcf7d2",  # Yellow - fourth column (if needed)
+    "#d5e0ec",  # Blue - fifth column (if needed)
+    "#e8d5c3",  # Tan - sixth column (if needed)
+    "#c3e8d5",  # Light green - seventh column (if needed)
+]
+
+
+def get_day_color(index: int) -> str:
+    """
+    Get the background color for a day column by its index.
+    
+    Args:
+        index: 0-based index of the day column
+        
+    Returns:
+        Hex color string for the background
+    """
+    return DAY_COLUMN_COLORS[index % len(DAY_COLUMN_COLORS)]
