@@ -24,7 +24,8 @@
         /* Basic responsive column sizing (simplified) */
         @media (min-width: 992px) { /* Corresponds to 'lg' breakpoint */
             .col-lg-4 {
-                width: 33.3333%;
+                flex: 1;
+                min-width: 0; /* Prevents flex items from overflowing */
             }
             .col-lg-6 {
                 width: 50%;
