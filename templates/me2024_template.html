@@ -286,7 +286,7 @@
                     <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;">
                         <span style="color: #2c333e; font-family: inherit; font-size: 1rem;">
                             {% if pdf_urls.syllabus_schedule %}
-                                <a href="{{ pdf_urls.syllabus_schedule }}" rel="noopener" style="color: #2c333e;">Full Schedule Calendar (PDF)</a>
+                                <a class="instructure_file_link instructure_scribd_file inline_disabled" href="{{ pdf_urls.syllabus_schedule }}" rel="noopener" style="color: #2c333e;">Full Schedule Calendar (PDF)</a>
                             {% else %}
                                 Full Schedule Calendar (PDF)
                             {% endif %}
@@ -295,7 +295,7 @@
                     </div>
                     <div style="background-color: #fcf7d2; padding-left: 15px; text-align: center; padding-top: 5px; padding-bottom: 5px;">
                         {% if pdf_urls.syllabus %}
-                            <a href="{{ pdf_urls.syllabus }}" rel="noopener" style="color: #2c333e; font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Course Syllabus (PDF)</a>
+                            <a class="instructure_file_link instructure_scribd_file inline_disabled" href="{{ pdf_urls.syllabus }}" rel="noopener" style="color: #2c333e; font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Course Syllabus (PDF)</a>
                         {% else %}
                             <span class="textLayer--absolute" style="font-family: inherit; font-size: 1rem;" dir="ltr" role="presentation">Course Syllabus (PDF)</span>
                         {% endif %}
