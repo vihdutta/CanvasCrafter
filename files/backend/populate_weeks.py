@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 import pandas as pd
 import yaml
 import numpy as np
@@ -25,7 +26,24 @@ def populate_weeks(
 ):
     DATA_START_ROW = 1
     df = pd.read_excel(excel_schedule_path, engine="openpyxl")
-    weeks_column = df.iloc[DATA_START_ROW:, 1].ffill().astype(int)
+
+    def _normalize_week_key(val):
+        if pd.isna(val):
+            return ""
+        s = str(val).strip()
+        try:
+            f = float(s)
+            if f == int(f):
+                return str(int(f))
+        except (ValueError, TypeError):
+            pass
+        return s.lower()
+
+    def _base_key(w):
+        m = re.match(r'^(\d+)', str(w))
+        return m.group(1) if m else str(w)
+
+    weeks_column = df.iloc[DATA_START_ROW:, 1].ffill().map(_normalize_week_key)
     df = df.replace(np.nan, "")
 
     overview_data, objective_data, images_data = read_overview_and_objective_yaml(overview_path, objectives_path, images_path)
@@ -43,8 +61,8 @@ def populate_weeks(
     for w in set(weeks_column):
         weeks[w] = {}
         weeks[w]["module"] = ""
-        weeks[w]["overview_statement"] = overview_data[w]["description"]
-        weeks[w]["image"] = image_urls[w]
+        weeks[w]["overview_statement"] = overview_data[_base_key(w)]["description"]
+        weeks[w]["image"] = image_urls[_base_key(w)]
 
     for index, row in df.iterrows():
         if index == 0:
@@ -120,11 +138,13 @@ def read_overview_and_objective_yaml(
     images_data = {}
 
     with open(overview_path, "r", encoding="utf-8") as f:
-        overview_data = yaml.safe_load(f)
+        raw = yaml.safe_load(f)
+        overview_data = {str(k).lower(): v for k, v in raw.items()}
     with open(objectives_path, "r", encoding="utf-8") as f:
         objective_data = yaml.safe_load(f)
     with open(images_path, "r", encoding="utf-8") as f:
-        images_data = yaml.safe_load(f)
+        raw = yaml.safe_load(f)
+        images_data = {str(k).lower(): v for k, v in raw.items()}
 
     return (overview_data, objective_data, images_data)
 

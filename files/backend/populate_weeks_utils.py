@@ -528,7 +528,7 @@ def find_homework_due_date_across_weeks(weeks_data: Dict, hw_number: str) -> str
     """Find the due date for a specific homework number across all weeks."""
     for week_num, week_data in weeks_data.items():
         # Skip non-numeric keys like 'icon_urls'
-        if not str(week_num).isdigit():
+        if week_num in ("icon_urls", "lecture_info"):
             continue
 
         for day in [
@@ -552,7 +552,7 @@ def find_homework_assigned_date_across_weeks(weeks_data: Dict, hw_number: str) -
     """Find the assigned date for a specific homework number across all weeks."""
     for week_num, week_data in weeks_data.items():
         # Skip non-numeric keys like 'icon_urls'
-        if not str(week_num).isdigit():
+        if week_num in ("icon_urls", "lecture_info"):
             continue
 
         for day in [

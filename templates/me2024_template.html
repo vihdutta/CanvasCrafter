@@ -241,7 +241,7 @@
                     <ul>
                         {% if day.data.prework_video_title and day.data.prework_video_title.strip() %}
                             {% set title_parts = day.data.prework_video_title.split(' - ', 1) %}
-                            {% set display_title = 'Prework ' + day.data.lesson + ' - ' + title_parts[1] %}
+                            {% set display_title = 'Prework ' ~ day.data.lesson ~ ' - ' ~ title_parts[1] %}
                             <li>Video: <a href="{{ day.data.prework_video_link }}">{{ display_title }}</a></li>
                         {% endif %}
                         <li>Be ready to ask questions and talk with your classmates about the prework content!</li>

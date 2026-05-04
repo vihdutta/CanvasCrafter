@@ -185,20 +185,11 @@ async def generate(path: str):
             elif filename.startswith("week_"):
                 # weekly page file - extract week number and generate proper title
                 week_number_str = filename.replace(f"_{unique_identifier}.html", "").replace("week_", "")
-                try:
-                    display_week_num = int(week_number_str)
-                    if weeks_data:
-                        week_name = get_week_title_with_topic_and_date(weeks_data, display_week_num)
-                    else:
-                        # Fallback to old format if weeks_data not available
-                        week_name = f"Week {display_week_num}"
-                except ValueError:
-                    # Fallback to old format if parsing fails
-                    week_name = (
-                        filename.replace(f"_{unique_identifier}.html", "")
-                        .replace("_", " ")
-                        .title()
-                    )
+                display_week_num = week_number_str
+                if weeks_data:
+                    week_name = get_week_title_with_topic_and_date(weeks_data, display_week_num)
+                else:
+                    week_name = f"Week {display_week_num}"
                 
                 with open(html_file, "r", encoding="utf-8") as f:
                     html_content = f.read()
@@ -207,12 +198,14 @@ async def generate(path: str):
                     {"name": week_name, "html": html_content, "type": "weekly"}
                 )
 
-        # Sort weekly files numerically by week number
+        # Sort weekly files by week number (supports "1a", "2b", etc.)
         def get_week_number(item):
-            try:
-                return int(item["name"].lower().replace("week ", ""))
-            except (ValueError, AttributeError):
-                return float("inf")
+            import re
+            week_part = item["name"].lower().split(":")[0].strip().replace("week ", "").strip()
+            m = re.match(r'^(\d+)([a-zA-Z]*)$', week_part)
+            if m:
+                return (int(m.group(1)), m.group(2))
+            return (float("inf"), week_part)
 
         weekly_files = sorted(weekly_files, key=get_week_number)
 
@@ -575,16 +568,11 @@ async def upload_to_canvas(
                 base_filename = os.path.splitext(filename)[0].replace(file_group_identifier, "").strip()
                 if base_filename.startswith("week_"):
                     week_number_str = base_filename.replace("week_", "").replace("_", "")
-                    try:
-                        display_week_num = int(week_number_str)
-                        if weeks_data:
-                            title = get_week_title_with_topic_and_date(weeks_data, display_week_num)
-                        else:
-                            # Fallback to old format if weeks_data not available
-                            title = f"Week {display_week_num}"
-                    except ValueError:
-                        # Fallback to old format if parsing fails
-                        title = base_filename.replace("_", " ").title()
+                    display_week_num = week_number_str
+                    if weeks_data:
+                        title = get_week_title_with_topic_and_date(weeks_data, display_week_num)
+                    else:
+                        title = f"Week {display_week_num}"
                 else:
                     # Fallback to old format for non-weekly files
                     title = base_filename.replace("_", " ").title()

@@ -1,6 +1,7 @@
 import os
 import glob
 import pickle
+import re
 from jinja2 import Environment, FileSystemLoader
 from files.backend.populate_weeks import populate_weeks
 from files.backend.build_htmls.build_hw import build_homework_html
@@ -46,8 +47,15 @@ def build_html(
     env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template("me2024_template.html")
 
-    # Filter out non-numeric keys (like 'icon_urls') before sorting
-    keys = sorted([k for k in weeks_data.keys() if str(k).isdigit()], key=int)
+    _NON_WEEK_KEYS = {"icon_urls", "lecture_info"}
+
+    def _week_sort_key(k):
+        m = re.match(r'^(\d+)([a-zA-Z]*)$', str(k))
+        if m:
+            return (int(m.group(1)), m.group(2))
+        return (float('inf'), str(k))
+
+    keys = sorted([k for k in weeks_data.keys() if k not in _NON_WEEK_KEYS], key=_week_sort_key)
 
     if not course_id:
         raise ValueError(
@@ -65,25 +73,24 @@ def build_html(
     for i, key in enumerate(keys):
         curr_week = weeks_data[key]
 
-        # Artificially adjust week numbers to start at 37
-        display_week_num = int(key)
+        display_week_num = key
 
-        # Generate navigation links
-        prev_week_num = display_week_num - 1
-        next_week_num = display_week_num + 1
+        # Generate navigation links using index-based lookup
+        prev_week_num = keys[i - 1] if i > 0 else None
+        next_week_num = keys[i + 1] if i < len(keys) - 1 else None
 
         # Create URL-safe slugs using the same logic as upload_to_canvas
         prev_slug = None
         next_slug = None
 
-        if prev_week_num > 0:
+        if prev_week_num is not None:
             prev_week_title = get_week_title_with_topic_and_date(
                 weeks_data, prev_week_num
             )
             # Convert title to URL-safe slug using the same function as everywhere else
             prev_slug = title_to_url_safe(prev_week_title)
 
-        if i < len(keys) - 1:
+        if next_week_num is not None:
             next_week_title = get_week_title_with_topic_and_date(
                 weeks_data, next_week_num
             )
@@ -102,17 +109,17 @@ def build_html(
             next_week_text = "N/A"
 
         # Find next upcoming quiz for this week
-        next_quiz = find_next_quiz(weeks_data, int(key))
+        next_quiz = find_next_quiz(weeks_data, key)
 
         # Find next upcoming checkout for this week
-        next_checkout = find_next_checkout(weeks_data, int(key))
+        next_checkout = find_next_checkout(weeks_data, key)
 
         # Collect homework assignments for this week
         homework_opening_this_week = collect_homework_assignments_opening_during_week(
-            weeks_data, int(key)
+            weeks_data, key
         )
         homework_due_this_week = collect_homework_assignments_due_during_week(
-            weeks_data, int(key)
+            weeks_data, key
         )
 
         # Get the days present in this week (dynamically from spreadsheet data)
