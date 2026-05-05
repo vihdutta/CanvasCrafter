@@ -243,11 +243,11 @@
                     {% else %}
                     <h4>Prework</h4>
                     <ul>
-                        {% if day.data.prework_video_title and day.data.prework_video_title.strip() %}
-                            {% set title_parts = day.data.prework_video_title.split(' - ', 1) %}
+                        {% for video in day.data.prework_videos %}
+                            {% set title_parts = video.title.split(' - ', 1) %}
                             {% set display_title = 'Prework ' ~ day.data.lesson ~ ' - ' ~ title_parts[1] %}
-                            <li>Video: <a href="{{ day.data.prework_video_link }}">{{ display_title }}</a></li>
-                        {% endif %}
+                            <li>Video: <a href="{{ video.link }}">{{ display_title }}</a></li>
+                        {% endfor %}
                         <li>Be ready to ask questions and talk with your classmates about the prework content!</li>
                     </ul>
                     <h4>Referenced Reading</h4>

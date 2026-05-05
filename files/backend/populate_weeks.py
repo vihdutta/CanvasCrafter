@@ -99,19 +99,17 @@ def populate_weeks(
             weeks[weeks_column[index]][weekday]["checkout_info"] = checkout_info
             
             prework_title_raw = str(row[11]).strip() if not pd.isna(row[11]) else ""
-            if prework_title_raw and prework_title_raw != "":
+            if prework_title_raw:
                 current_module = weeks[weeks_column[index]]["module"]
-                prework_title_with_prefix = f"Prework Module {current_module} - {prework_title_raw}"
-                weeks[weeks_column[index]][weekday]["prework_video_title"] = prework_title_with_prefix
-                url_safe_title = title_to_url_safe(prework_title_with_prefix)
-                if url_safe_title and course_id:
-                    prework_link = f"https://umich.instructure.com/courses/{course_id}/pages/{url_safe_title}"
-                    weeks[weeks_column[index]][weekday]["prework_video_link"] = prework_link
-                else:
-                    weeks[weeks_column[index]][weekday]["prework_video_link"] = ""
+                prework_videos = []
+                for part in [p.strip() for p in prework_title_raw.split(" AND ")]:
+                    prefixed = f"Prework Module {current_module} - {part}"
+                    url_safe_title = title_to_url_safe(prefixed)
+                    link = f"https://umich.instructure.com/courses/{course_id}/pages/{url_safe_title}" if url_safe_title and course_id else ""
+                    prework_videos.append({"title": prefixed, "link": link})
+                weeks[weeks_column[index]][weekday]["prework_videos"] = prework_videos
             else:
-                weeks[weeks_column[index]][weekday]["prework_video_title"] = row[11]
-                weeks[weeks_column[index]][weekday]["prework_video_link"] = ""
+                weeks[weeks_column[index]][weekday]["prework_videos"] = []
 
         else:
             print(f"Warning: Row {index} has non-datetime value in date field: {row[4]}")
