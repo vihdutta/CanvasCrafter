@@ -14,7 +14,7 @@
             margin-left: -15px;
             margin-right: -15px;
         }
-        .col-sm-12, .col-md-12, .col-lg-4, .col-lg-6, .col-md-7, .col-md-5, .col-xs-12 {
+        .col-sm-12, .col-md-12, .col-lg-4, .col-lg-6, .col-lg-12, .col-md-7, .col-md-5, .col-xs-12 {
             padding-left: 15px;
             padding-right: 15px;
             box-sizing: border-box;
@@ -24,11 +24,13 @@
         /* Basic responsive column sizing (simplified) */
         @media (min-width: 992px) { /* Corresponds to 'lg' breakpoint */
             .col-lg-4 {
-                flex: 1;
-                min-width: 0; /* Prevents flex items from overflowing */
+                width: 33.3333%;
             }
             .col-lg-6 {
                 width: 50%;
+            }
+            .col-lg-12 {
+                width: 100%;
             }
         }
         @media (min-width: 768px) { /* Corresponds to 'md' breakpoint */
@@ -167,8 +169,10 @@
     </div>
     <div class="content-box">
         <div class="grid-row">
+            {% set num_days = week_days|length %}
+            {% if num_days == 1 %}{% set day_col = 'col-lg-12' %}{% elif num_days == 2 %}{% set day_col = 'col-lg-6' %}{% else %}{% set day_col = 'col-lg-4' %}{% endif %}
             {% for day in week_days %}
-            <div class="col-sm-12 col-md-12 col-lg-4">
+            <div class="col-sm-12 col-md-12 {{ day_col }}">
                 <div class="styleguide-section__grid-demo-element">
                     <div style="background-color: {{ day.color }}; padding-left: 15px;">
                         {% if (day.data.topic and "No Class" in day.data.topic) or (not day.data.topic or not day.data.topic.strip()) %}
