@@ -269,11 +269,7 @@ def collect_quiz_dates(weeks_data: Dict) -> List[Dict]:
     quizzes = []
 
     for week_num, week_data in weeks_data.items():
-        # Check each lecture day for quizzes
-        from files.backend.populate_weeks import get_lecture_days_list
-
-        lecture_days = get_lecture_days_list()
-        for day in lecture_days:
+        for day in ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]:
             if day in week_data:
                 day_data = week_data[day]
                 quiz_info = day_data.get("quiz_info", {})
